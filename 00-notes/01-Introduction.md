@@ -5,7 +5,7 @@
 # 1、Docker + Postgres
 
 - course video :<https://www.youtube.com/watch?v=EYNwNlOrpr0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb>
--
+- test git add
 
 # 2、GCP + Terraform
 
