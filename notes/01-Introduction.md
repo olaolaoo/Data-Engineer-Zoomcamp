@@ -153,24 +153,154 @@ docker run -it \
 - `-v` points to the volume directory. The colon `:` separates the first part (path to the folder in the host computer) from the second part (path to the folder inside the container).
   - Path names must be absolute. If you're in a UNIX-like system, you can use `pwd` to print you local folder as a shortcut; this example should work with both `bash` and `zsh` shells, but `fish` will require you to remove the `$`.
   - This command will only work if you run it from a directory which contains the `ny_taxi_postgres_data` subdirectory you created above.
-- The `-p` is for port mapping. We map the default Postgres port to the same port in the host.
+- The `-p` is for port mapping（端口映射）. We map the default Postgres port to the same port in the host.  **-p HOST_PORT:CONTAINER_PORT**
 - The last argument is the image name and tag. We run the official `postgres` image on its version `13`.
 
 Once the container is running, we can log into our database with [pgcli](https://www.pgcli.com/) with the following command:
+
+如果想要获得语法帮助，在bash中输入pgcli --help
 
 ```bash
 pgcli -h localhost -p 5432 -u root -d ny_taxi
 ```
 
+- `pgcli`pgclient，是一个python的library ，可以使用pip install pgcli 安装，
 - `-h` is the host. Since we're running locally we can use `localhost`.
 - `-p` is the port.
 - `-u` is the username.
 - `-d` is the database name.
 - The password is not provided; it will be requested after running the command.
 
+## 2.4、Ingesting data to Postgres with Python
 
+([*Video source*](https://www.youtube.com/watch?v=2JM-ziJt0WI&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=4))
 
+We will now create a Jupyter Notebook `upload-data.ipynb` file which we will use to read a CSV file and export it to Postgres. But According to the [TLC data website](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page), from 05/13/2022, the data will be in `.parquet` format instead of `.csv` The website has provided a useful [link](https://www1.nyc.gov/assets/tlc/downloads/pdf/working_parquet_format.pdf) with sample steps to read `.parquet` file and convert it to Pandas data frame.
 
+> Note: knowledge of Jupyter Notebook, Python environment management and Pandas is asumed in these notes. Please check [this link](https://gist.github.com/ziritrion/9b80e47956adc0f20ecce209d494cd0a#pandas) for a Pandas cheatsheet and [this link](https://gist.github.com/ziritrion/8024025672ea92b8bdeb320d6015aa0d) for a Conda cheatsheet for Python environment management.
+
+Check the completed `upload-data.ipynb` [in this link](../1_intro/upload-data.ipynb) for a detailed guide. Feel free to copy the file to your work directory; in the same directory you will need to have the CSV file linked above and the `ny_taxi_postgres_data` subdirectory.
+
+## 2.5、Connecting pgAdmin and Postgres with Docker networking
+
+_([Video source](https://www.youtube.com/watch?v=hCAIVe9N0ow&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=5))_
+
+`pgcli` is a handy tool but it's cumbersome to use. [`pgAdmin` is a web-based tool](https://www.pgadmin.org/) that makes it more convenient to access and manage our databases. It's possible to run pgAdmin  as container along with the Postgres container, **but both containers will have to be in the same _virtual network_ so that they can find each other.**
+
+Let's create a virtual Docker network called `pg-network`:
+
+```bash
+docker network create pg-network
+```
+
+>You can remove the network later with the command `docker network rm pg-network` . You can look at the existing networks with `docker network ls` .
+
+We will now re-run our Postgres container with the added network name and the container network name, so that the pgAdmin container can find it (we'll use `pg-database` for the container name):
+
+```bash
+docker run -it \
+    -e POSTGRES_USER="root" \
+    -e POSTGRES_PASSWORD="root" \
+    -e POSTGRES_DB="ny_taxi" \
+    -v $(pwd)/ny_taxi_postgres_data:/var/lib/postgresql/data \
+    -p 5432:5432 \
+    --network=pg-network \
+    --name pg-database \
+    postgres:13
+```
+
+We will now run the pgAdmin container on another terminal:
+
+```bash
+docker run -it \
+    -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
+    -e PGADMIN_DEFAULT_PASSWORD="root" \
+    -p 8080:80 \
+    --network=pg-network \
+    --name pgadmin \
+    dpage/pgadmin4
+```
+* The container needs 2 environment variables: a login email and a password. We use `admin@admin.com` and `root` in this example.
+ * ***IMPORTANT: these are example values for testing and should never be used on production. Change them accordingly when needed.***
+* pgAdmin is a web app and its default port is 80; we map it to 8080 in our localhost to avoid any possible conflicts.
+* Just like with the Postgres container, we specify a network and a name. However, the name in this example isn't really necessary because there won't be any containers trying to access this particular container.
+* The actual image name is `dpage/pgadmin4` .
+
+You should now be able to load pgAdmin on a web browser by browsing to `localhost:8080`. Use the same email and password you used for running the container to log in.
+
+Right-click on _Servers_ on the left sidebar and select _Create_ > _Server..._
+
+![steps](images/01_02.png)
+
+Under _General_ give the Server a name and under _Connection_ add the same host name, user and password you used when running the container.
+
+![steps](images/01_03.png)
+![steps](images/01_04.png)
+
+Click on _Save_. You should now be connected to the database.
+
+We will explore using pgAdmin in later lessons.
+
+## 2.6、Using the ingestion script with Docker
+
+_([Video source](https://www.youtube.com/watch?v=B1WwATwf-vY&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=8))_
+
+We will now export the Jupyter notebook file to a regular Python script and use Docker to run it.
+
+### Exporting and testing the script
+
+You can export the `ipynb` file to `py` with this command:
+
+```bash
+jupyter nbconvert --to=script upload-data.ipynb
+```
+
+Clean up the script by removing everything we don't need. We will also rename it to `ingest_data.py` and add a few modifications:
+* We will use [argparse](https://docs.python.org/3/library/argparse.html) to handle the following command line arguments:
+    * Username
+    * Password
+    * Host
+    * Port
+    * Database name
+    * Table name
+    * URL for the CSV file
+* The _engine_ we created for connecting to Postgres will be tweaked so that we pass the parameters and build the URL from them, like this:
+    ```python
+    engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{db}')
+    ```
+* We will also download the CSV using the provided URL argument.
+
+You can check the completed `ingest_data.py` script [in this link](../1_intro/ingest_data.py).
+
+In order to test the script we will have to drop the table we previously created. In pgAdmin, in the sidebar navigate to _Servers > Docker localhost > Databases > ny_taxi > Schemas > public > Tables > yellow_taxi_data_, right click on _yellow_taxi_data_ and select _Query tool_. Introduce the following command:
+
+```sql
+DROP TABLE yellow_taxi_data;
+```
+
+We are now ready to test the script with the following command:
+
+```bash
+python ingest_data.py \
+    --user=root \
+    --password=root \
+    --host=localhost \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name=yellow_taxi_trips \
+    --url="https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2021-01.csv"
+```
+* Note that we've changed the table name from `yellow_taxi_data` to `yellow_taxi_trips`.
+
+Back in pgAdmin, refresh the Tables and check that `yellow_taxi_trips` was created. You can also run a SQL query to check the contents:
+
+```sql
+SELECT
+    COUNT(1)
+FROM
+    yellow_taxi_trips;
+```
+* This query should return 1,369,765 rows.
 
 # 3、GCP + Terraform
 
