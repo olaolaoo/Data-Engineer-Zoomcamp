@@ -1,0 +1,13 @@
+prefect
+prefect-sqlalchemy
+prefect-gcp[cloud_storage]
+protobuf
+pyarrow
+pandas-gbq
+psycopg2-binary
+sqlalchemy
+pgcli
+ruamel-yaml
+pyqtwebengine
+pyqt5
+psycopg_binary
