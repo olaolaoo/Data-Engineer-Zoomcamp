@@ -1,3 +1,5 @@
+> Next:[02_data_ingestion](02_data_ingestion.md)
+
 # 1、Introduction
 
 **Data Engineering** is the design and development of systems for collecting, storing and analyzing data at scale.（**数据工程**是用于大规模收集，存储和分析数据的系统的设计和开发）
@@ -12,7 +14,7 @@
 
 Docker可以运行不同的容器，主要是在其中运行postgres容器和启动它，启动后，就可以使用docker制作pipeline（灌入数据？？）见2.6正式使用
 
-## 2.1、what's docker
+## 2.1.What's docker
 
 **_([video scource](https://www.youtube.com/watch?v=EYNwNlOrpr0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=3))_**
 
@@ -33,7 +35,7 @@ Docker containers are **_stateless_**: any changes done inside a container will 
 
 > Note: you can learn more about Docker and how to set it up on a Mac [in this link](https://github.com/ziritrion/ml-zoomcamp/blob/11_kserve/notes/05b_virtenvs.md#docker). You may also be interested in a [Docker reference cheatsheet](https://gist.github.com/ziritrion/1842c8a4c4851602a8733bba19ab6050#docker).
 
-## 2.2、Creating a custom pipeline with Docker
+## 2.2.Creating a custom pipeline with Docker
 
 **do all the things in Mac Terminal after setting up docker on your Mac:**
 

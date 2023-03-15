@@ -2,11 +2,18 @@
 
 >Next: [03_data_warehouse](03_data_warehouse.md)
 
+本章总结：
+
+* 使用Prefect实现ETL的workflow，将数据存储在云端或本地，GCP用于云端存储数据（GCS中的bucket用于存储数据，Big Query查询和计算数据）
+* 实现方法：prefect **+** script.py **+** command运行py文档or Deployment
+
+[code from the video](https://github.com/discdiver/prefect-zoomcamp)
+
 # Data Ingestion
 
 This lesson will cover the topics of _Data Lake_ and _pipelines orchestration with *prefect*
 
-# 1.Data Lake
+# -1.Data Lake
 
 _[Video source](https://www.youtube.com/watch?v=W3Zm6rjOq70&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=16)_
 
@@ -83,7 +90,7 @@ Data Lakes are only useful if data can be easily processed from it. Techniques s
 * Amazon Web Services > [Amazon S3](https://aws.amazon.com/s3/)
 * Microsoft Azure > [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/)
 
-# 2.Introduction to Workflow Orchestration
+# -2.Introduction to Workflow Orchestration
 
 工作流编排工具
 
@@ -135,11 +142,11 @@ A ***Workflow Orchestration Tool*** allows us to define data workflows and param
 
 The tool we will focus on in this course is Prefect , but there are many others such as Luigi,  **[Apache Airflow](https://airflow.apache.org/)**,, Argo, etc.
 
-# 3.Introduction to Prefect Concepts
+# -3.Introduction to Prefect Concepts, without ETL
 
 Perfect is the modern open source data flow automation platform that's going to allow you to add observability and orchestration by using python just to write code as workflows and it's going to let you build run and monitor this pipeline at scale.
 
-## *Method_1：without prefect,Manual import*
+## *Method_1：Not Using prefect, Manual Load Data* to Postgres
 
 **Step1:建立ingest_data_parquet.py文档**
 
@@ -181,7 +188,7 @@ python ingest_data_parquet.py
 
 在终端中输入`pgcli -h localhost -p 5432 -u root -d ny_taxi`，打开数据库，输入`\dt`查看所有数据表
 
-## *Method_2：with prefect,Prefect Workfolw import*
+## *Method_2：Using  Prefect Workfolw  To Load Data to postgres*
 
 ***Step1:建立ingest_data_parquet_flow.py文档***
 
@@ -335,18 +342,20 @@ _[videocourse](https://www.youtube.com/watch?v=W-rMz_2GwqQ&list=PL3MmuxUbc_hJed7
 
 Check out the dashboard at [http://127.0.0.1:4200](http://127.0.0.1:4200/)
 
-## ***Step2:Without GCP Buket***
+## ***Step2:Load and save data***
+
+### *** 2.1.Load and save data in local, without GCP Bucket***
 
 ***建立并运行etl_web_to_gcs.py文档***
 
-建立导入数据`etl_web_to_gcs.py`文档，见[这个链接](../2_data_ingestion/etl_web_to_gcs.py)
+建立导入数据`etl_web_to_local.py`文档，见[这个链接](../2_data_ingestion/etl_web_to_local.py)
 
-终端输入`python etl_web_to_gcs.py`
+终端输入`python etl_web_to_local.py`
 
 过程:
 
 ```bash
-(base) ola@192 2_data_ingestion % python etl_web_to_gcs.py
+(base) ola@192 2_data_ingestion % python etl_web_to_local.py
 11:52:56.814 | INFO    | prefect.engine - Created flow run 'myrtle-oryx' for flow 'etl-web-to-gcs'
 11:52:57.234 | INFO    | Flow run 'myrtle-oryx' - Created task run 'fetch-0' for task 'fetch'
 11:52:57.236 | INFO    | Flow run 'myrtle-oryx' - Executing 'fetch-0' immediately...
@@ -397,7 +406,7 @@ dtype: object
 11:53:07.696 | INFO    | Flow run 'myrtle-oryx' - Finished in state Completed('All states completed.')
 ```
 
-## *Step2:With GCP Bucket*
+### 2.2.*Load data and save data in GCP Bucket*
 
 * **建立一个bucket（在Cloud Storage下面），**在GCP的IM中建立一个service account，建立一个项目，也可以在老的服务账号里，如何建立一个Create service account：
   * On **Google Cloud Console**, select **IAM & Admin**, and **Service Accounts**. Then click on **+ CREATE SERVICE ACCOUNT** with these informations:
@@ -410,13 +419,17 @@ dtype: object
   * 在**prefect**中建立**普通**GCS Bucket的**Block**
     * Inside Orion, select **Blocks** at the left menu, choose the block **GCS Bucket** and click **Add +** button. Complete the form with:
     * Block Name: zoom-gcs
-    * Name of the bucket: dtc_data_lake_firstone==上面一步建立的bucket名字一样==
+    * Name of the bucket: dtc_data_lake_firstone==GCS中建立的bucket名字一样==
     * click create button
   * 在**prefect**中建立**加密GCS Bucket的**Block
     * Under **Gcp Credentials**, click on **Add +** button to create a **GCP Credentials** with these informations:
     * block Name: zoom-gcp-creds
-    * 将service account中的key json内容贴进去
-
+    * 将service account中的key json内容贴进去，可以直接手动个打开粘贴复制，也可以使用命令
+      * `cat ~/opt/gcp/hopeful-summer-375416-c150de675a7d.json | pbcopy`
+  * ==可能出现的问题==：打开prefect orion后，在http://127.0.0.1:4200的block下面找不到GCS Bucket，需要重新安装一下prefect-gcp，在终端输入
+    * `pip install prefect_gcp`
+    * `prefect block register -m prefect_gcp`
+    * 重新刷新http://127.0.0.1:4200，在block下找到GCS Bucket
 * **Modify our python program**
 
 We then obtain a fragment of code to insert into our python code. Which allows us to add the `write_gcs` method to `etl_web_to_gcs.py`增加函数：
@@ -446,23 +459,11 @@ _[videocourse](https://www.youtube.com/watch?v=Cx5jt-V5sgE&list=PL3MmuxUbc_hJed7
 
 Now let’s create another python program to load our data into the Google Cloud Storage (GCS) to Big Query.
 
-## *Method_1：Manual setup In GCP*
+## *Method_1：Manual setup In GCP UI interface*
 
-![](images/00_bq1.png)
-
-> choose big query from the left hamburger menu
-
-![00_bq2](images/00_bq2.png)
-
->  choose Google Cloud Storage
-
-![00_bq3](images/00_bq3.png)
-
-> You need to decide the final part of Destination, except for the Project that should be choosen from existed ones
-
-![00_bq4](images/00_bq4.png)
-
-> check out the data using query, after the former steps
+| choose big query from the left hamburger menu | choose Google Cloud Storage  | You need to decide the final part of Destination, except for the Project that should be choosen from existed ones | check out the data using query, after the former steps |
+| --------------------------------------------- | ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
+| ![](images/00_bq1.png)                        | ![00_bq2](images/00_bq2.png) | ![00_bq3](images/00_bq3.png)                                 | ![00_bq4](images/00_bq4.png)                           |
 
 ## *Method_2：Prefect Workfolw setup using python*
 
@@ -503,6 +504,8 @@ Check out the big query , you should see the table you added in step2.
 
 # 6.Parametrizing Flow & Deployments with ETL into GCS flow
 
+参数流程&调度
+
 We will see in this section:
 
 - Parametrizing the script from your flow (rather then hard coded)
@@ -512,17 +515,96 @@ We will see in this section:
 - Setting up Prefect Agent
 - Notifications
 
-## *Parametrizing the script from your flow*
+## 6.1.*Parametrizing the script from your flow*
 
-## *Parameter validation with Pydantic*
+从流程中参数化脚本，使用for循环？？
 
-## *Creating a deployment locally*
+### ***Step1:Start Prefect Orion***
 
-## *Running the flow*
+* type this command at the prompt：`prefect orion start`
 
-## *Setting up Prefect Agent*
+* Check out the dashboard at [http://127.0.0.1:4200](http://127.0.0.1:4200/)
 
-## *Notifications*
+### *Step2:Modify and Run  python program*
+
+establishe`parameterized_flow.py`文档，见[这个链接](../2_data_ingestion/parameterized_flow.py)
+
+
+
+## 6.2.*Parameter validation with Pydantic*
+
+We do nothing with Pydantic in the video… But it would be relevant to add this tool in my code. See [pydantic](https://docs.pydantic.dev/).
+
+There are many ways to create a deployment, but we will use [CLI](https://docs.prefect.io/concepts/deployments/#create-a-deployment-on-the-cli). In a future video, we will see how to deploy with python script.See [Deployments overview](https://docs.prefect.io/concepts/deployments/#deployments-overview) for more information.
+
+## *6.3.Building a deployment locally*
+
+### Step1:create a deployment file.
+
+```bash
+cd ~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion/flows
+prefect orion start
+
+prefect deployment build 03_deployments/parameterized_flow.py:etl_parent_flow -n "Parameterized ETL"
+```
+
+A deployment model `etl_parent_flow-deployment.yaml` is created.
+
+edit etl_parent_flow-deployment.yaml, parameters: {}--->parameters: {color : "yellow",months :[1, 2, 3],year :2021}
+
+过程：
+
+```bash
+(base) ola@192 2_data_ingestion % prefect deployment build parameterized_flow.py:etl_parent_flow -n "Parameterized ETL"
+Found flow 'etl-parent-flow'
+Default '.prefectignore' file written to /Users/ola/Library/Mobile 
+Documents/com~apple~CloudDocs/Data-Engineer-Zoomcamp/2_data_ingestion/.prefectignore
+Deployment YAML created at '/Users/ola/Library/Mobile 
+Documents/com~apple~CloudDocs/Data-Engineer-Zoomcamp/2_data_ingestion/etl_parent_flow-deployment.yaml'.
+Deployment storage None does not have upload capabilities; no files uploaded.  Pass --skip-upload to suppress this warning.
+```
+
+### Step2:*Ready to be run the flow in Prefect UI* 
+
+```bash
+prefect deployment apply etl_parent_flow-deployment.yaml
+```
+
+```bash
+(base) ola@192 2_data_ingestion % prefect deployment apply etl_parent_flow-deployment.yaml
+Successfully loaded 'Parameterized ETL'
+Deployment 'etl-parent-flow/Parameterized ETL' successfully created with id 'bd869807-1681-48e2-98a3-086ed73409d2'.
+View Deployment in UI: http://127.0.0.1:4200/deployments/deployment/bd869807-1681-48e2-98a3-086ed73409d2
+
+To execute flow runs from this deployment, start an agent that pulls work from the 'default' work queue:
+$ prefect agent start -q 'default'
+```
+
+| Go to the Orion UI. We should see the deployment model is there. |                                  |
+| ------------------------------------------------------------ | -------------------------------- |
+| ![w2s12](images/00_deploy1.png)                              | ![w2s12b](images/00_deploy2.png) |
+
+Click on **Quick run** button.
+
+Select **Flow Runs** in the left menu. Orion UI should indicate that our run is in **Scheduled** state.
+
+The **Scheduled** state indicates that our flow a ready to be run but we have no agent picking of this run.
+
+### *Step3:Setting up Prefect Agent to run the flow*
+
+| Select **Work Pools** in the left menu. |                                 |                                 |
+| --------------------------------------- | ------------------------------- | ------------------------------- |
+| ![w2s12](images/00_agent1.png)          | ![w2s12b](images/00_agent2.png) | ![w2s12b](images/00_agent3.png) |
+
+copy the code in picture3 into the terminal
+
+`prefect agent start --pool default-agent-pool --work-queue default`
+
+## 6.4.*Notifications*
+
+We can setup a notification.
+
+Go to the Orion UI, select **Notifications** and create a notification.
 
 # 7.Schedules and Docker Storage with Infrastructure
 
@@ -534,14 +616,316 @@ We will see in this section:
 
 ## *Scheduling a deployment*
 
-## *Flow code storage*
+* See [Schedules](https://docs-v1.prefect.io/core/concepts/schedules.html) for more information.
 
-## *Running tasks in Docker*
+* See crontab work schedule snytax:
+
+```scss
+*     *     *   *    *        command to be executed
+-     -     -   -    -
+|     |     |   |    |
+|     |     |   |    +----- day of the week (0 - 6) (Sunday=0)
+|     |     |   +------- month (1 - 12)
+|     |     +--------- day of the month (1 - 31)
+|     +----------- hour (0 - 23)
++------------- min (0 - 59)
+```
+
+* Make sure that Prefect Orion UI is started.
+
+```bash
+cd ~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion/
+prefect orion start
+
+prefect deployment parameterized_flow.py:etl_parent_flow -n etl2 --cron "0 0 * * *" -a
+```
+
+We should see this in the terminal window.
+
+```bash
+Found flow 'etl-parent-flow'
+Default '.prefectignore' file written to /Users/boisalai/GitHub/prefect/.prefectignore
+Deployment YAML created at '/Users/boisalai/GitHub/prefect/etl_parent_flow-deployment.yaml'.
+Deployment storage None does not have upload capabilities; no files uploaded.  Pass --skip-upload to suppress this
+warning.
+Deployment 'etl-parent-flow/etl2' successfully created with id 'e580671d-3677-4e8d-8041-a6591ec0a92a'.
+
+To execute flow runs from this deployment, start an agent that pulls work from the 'default' work queue:
+$ prefect agent start -q 'default'
+```
+
+We should see new deployment that is named etl2  on the Orion UI, and it will execute everyday at 24:00.
+
+* We can obtain help on prefect command.
+
+```
+prefect deployment --help
+prefect deployment build --help
+prefect deployment apply --help
+```
+
+## *Flow code storage in Docker*
+
+we will store our code in Docker Hub.we're going to put those right into the docker image and they'll save us some time down the road when we want to pull those images and run things.
+
+### Step1: register in Docker Hub
+
+https://hub.docker.com/
+
+### Step2: Let’s make a `Dockerfile`.
+
+**File `~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion/docker-requirements.txt`**
+
+```txt
+pandas==1.5.2
+prefect-gcp[cloud_storage]==0.2.4
+protobuf==4.21.11
+pyarrow==10.0.1
+```
+
+**File `~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion/Dockerfile`**
+
+``` dockerfile
+# base Docker image that we will build on
+# use image：prefecthq/prefect，并指定了版本号为 2.7.7-python3.9
+FROM prefecthq/prefect:2.7.7-python3.9
+
+# 该命令将本地的 docker-requirements.txt 文件复制到 Docker 镜像中，这里的目标路径是 Docker 镜像的根目录。
+COPY docker-requirements.txt
+
+# 安装 docker-requirements.txt 文件中指定的 Python 依赖包。
+#其中，--trusted-host pypi.python.org 选项指定了信任的 PyPI 主机，--no-cache-dir 选项指定了不使用缓存目录。
+RUN pip install -r docker-requirements.txt --trusted-host pypi.python.org --no-cache-dir
+
+# 该命令将本地的 flows 目录复制到 Docker 镜像中，这里的目标路径是 /opt/prefect/flows
+COPY flows /opt/prefect/flows
+
+# 该命令在 Docker 镜像中创建一个目录 /opt/prefect/data/yellow，其中 -p 选项表示如果目录不存在，则会自动创建父目录。
+RUN mkdir -p /opt/prefect/data/yellow
+```
+
+### Step3: Let’s make a `docker image`.
+
+``` bash
+open your docker  app
+cd ~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion
+docker image build -t sleepyola/prefect:zoom .
+```
+
+Note that `sleepyola` is my dockerhub username.
+
+### Step4: push that image to your dockerhub
+
+Make sure you are already logged to dockerhub.
+
+``` bash
+cd ~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion
+docker login -u sleepyola
+docker image push sleepyola/prefect:zoom
+```
+
+### Step5: create a DockerContainer block 
+
+#### 5.1.method_1: in prefect Orion Ui
+
+Go to the Orion UI, select **Blocks** in the right menu, click the **+** button to add a **Docker Container** with these
+information:
+
+- **Block Name**: zoom
+- **Type (Optional)** \> The type of infrastructure: **docker-container**
+- **Image (Optional)** \> Tag of a Docker image to use: **sleepyola/prefect:zoom**
+- **ImagePullPolicy (Optional)**: ALWAYS
+- **Auto Remove (Optional)**: ON
+
+Then click on **Create** button.
+
+#### 5.2.method2: from python
+
+Note that it is also possible to create a DockerContainer block from python.
+
+**File `make_docker_block.py`**
+
+``` python
+from prefect.infrastructure.docker import DockerContainer
+
+## alternative to creating DockerContainer block in the UI
+docker_block = DockerContainer(
+    image="sleepyola/prefect:zoom",  # insert your image here
+    image_pull_policy="ALWAYS",
+    auto_remove=True,
+)
+
+docker_block.save("zoom", overwrite=True)
+```
+
+### Step6: create a deployment  
+
+We already know how to create a deployment file from command line. [you can check here](##6.3.Building a deployment locally)
+
+Now, we will create a deployment file from python.
+
+**File `docker_deploy.py`**
+
+``` python
+from prefect.deployments import Deployment
+from parameterized_flow import etl_parent_flow
+from prefect.infrastructure.docker import DockerContainer
+
+docker_block = DockerContainer.load("zoom")
+
+docker_dep = Deployment.build_from_flow(
+    flow=etl_parent_flow,
+    name="docker-flow",
+    infrastructure=docker_block,
+)
+
+
+if __name__ == "__main__":
+    docker_dep.apply()
+```
+
+Then, execute this script with this command.
+
+``` bash
+cd ~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion
+python flows/03_deployments/docker_deploy.py
+```
+
+Go to the Orion UI, select **Deployments** in the the menu. We should see the **docker-flow**. Click on it.
+
+if you want to add more deployments in one python script, here is the example:
+
+假设有一个名为`/opt/prefect/flows`的文件夹，其中包含两个Prefect流程定义文件`flow1.py`和`flow2.py`，并且每个文件定义了一个名为`flow1`和`flow2`的Prefect流程。现在，我们可以创建一个新文件`main.py`，用于在同一Docker容器中部署这两个流程。
+
+```python
+from prefect.deployments import Deployment
+from parameterized_flow import flow1, flow2
+from prefect.infrastructure.docker import DockerContainer
+
+docker_block = DockerContainer.load("zoom")
+
+deployments = []
+
+# 部署 flow1
+dep1 = Deployment.build_from_flow(
+    flow=flow1,
+    name="docker-flow1",
+    infrastructure=docker_block,
+)
+deployments.append(dep1)
+
+# 部署 flow2
+dep2 = Deployment.build_from_flow(
+    flow=flow2,
+    name="docker-flow2",
+    infrastructure=docker_block,
+)
+deployments.append(dep2)
+
+# 应用所有的部署
+for deployment in deployments:
+    deployment.apply()
+```
+
+在这个例子中，我们导入了两个流程定义，`flow1`和`flow2`，然后分别用它们来构建两个部署对象，并添加到一个列表中。最后，我们循环遍历这个列表，并将每个部署对象应用到Prefect引擎中。这样，我们就可以在同一个Docker容器中部署多个Prefect流程定义文件。
+
+
+
+See a list of available profiles:
+
+``` bash
+cd ~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion
+prefect profile ls
+```
+
+> `prefect profile ls`是Prefect CLI中的一个命令，用于列出当前系统中的所有Prefect配置文件及其相关信息。这些配置文件中包含了Prefect连接不同运行时后端的信息，例如连接Prefect Cloud或者Prefect Server等。在使用Prefect CLI和Prefect Engine运行workflow时，可以通过这些配置文件来指定要使用的运行时后端，以及该后端的相关信息。
+
+``` bash
+cd ~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion
+prefect config set PREFECT_API_URL="http://127.0.0.1:4200/api"
+```
+
+> `prefect config set PREFECT_API_URL="http://127.0.0.1:4200/api"`是Prefect CLI中的一个命令，用于设置Prefect CLI的全局配置参数。在这个例子中，这个命令设置了Prefect CLI使用的Prefect Server API的URL地址为"http://127.0.0.1:4200/api"。这个命令可以让Prefect CLI在运行时自动连接到指定的Prefect Server API，以便执行一些与Server API相关的操作，例如在Prefect Server中创建/修改workflow、任务等等。
+
+See [this link ,you can get some help](https://docs.prefect.io/concepts/settings/#setting-and-clearing-values).
+
+```bash
+执行 docker run -it sleepyola/prefect:zoom 后，终端变成了 root@b05e8f2abacb:/opt/prefect#，这表示你已经进入了 Docker 容器的命令行界面，其中 b05e8f2abacb 是容器的 ID，/opt/prefect# 是容器的工作目录。这意味着你可以在这个容器内执行命令，如在容器中安装软件、运行脚本等。当你退出容器的命令行界面后，该容器将停止运行。
+```
+
+
+
+Now the docker interface could communicate with the Orion server.
+
+``` bash
+cd ~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion
+prefect agent start -q default
+```
+
+### Step7:Running tasks in Docker
+
+#### 7.1.method_1:use command line
+
+Now we could run our flow from Orion UI or from command line. Here is how to do with command line.
+
+``` bash
+cd ~/iCloud/Data-Engineer-Zoomcamp/2_data_ingestion
+
+prefect deployment run etl-parent-flow/docker-flow -p "months=[1,2]"
+```
+
+We should see this in the terminal window.
+
+``` txt
+Creating flow run for deployment 'etl-parent-flow/docker-flow'...
+Created flow run 'precious-numbat'.
+└── UUID: 133c8d13-ee98-4944-8f21-245af5db8b9b
+└── Parameters: {'months': [1, 2]}
+└── Scheduled start time: 2023-01-28 16:32:44 EST (now)
+└── URL: http://127.0.0.1:4200/flow-runs/flow-run/133c8d13-ee98-4944-8f21-245af5db8b9b
+```
+
+#### **7.2.method_2:use prefect orion ui**
+
+open prefect agent -->Click on Deployments, select docker-flow, select Runs tab.
+
+==可能出现的问题==：
+
+* 在执运行后，prefect agent执行终端页面出现bugsh`1: wget: @SaveToNotion #thread found`，原因是在docker的容器内没有安装wget，所以需要在DockerFile中加入安装的脚本`RUN apt-get update && apt-get install -y wget`，重新创建prefect的镜像
+
+  * 解决方法：在这之前需要删除之前创建的image镜像
+    * 退出要删除的正在运行的image
+    * 可以在docker desktop上手动删除，但是推送到docker hub上的image仍然存在，好像是因为docker hub会缓存镜像
+    * 在终端输入 `docker rmi imagename`，刷新docker hub后，没有变化
+    * 再次登陆docker hub，手动删除image镜像
+
+* 上面问题解决后，又出现问题：
+
+  ```bash
+  Flow run encountered an exception. google.auth.exceptions.DefaultCredentialsError: Could not automatically determine credentials. Please set GOOGLE_APPLICATION_CREDENTIALS or explicitly create credentials and re-run the application. For more information, please see https://cloud.google.com/docs/authentication/getting-started
+  ```
+
+  * 解决方法：在脚本中使用的gcp Block中加入 **Gcp Credentials**，具体方法见[点击这里](###2.2.*Load data and save data in GCP Bucket*)
+    * **To solve this problem, I have go into Orion server, I selected my **zoom-gcp block and I added in the field **Gcp Credentials** my **zoom-gcp-creds**.The files appeared in my google bucket with no error message!
+
+## See also
+
+- [Jeff Hale - Supercharge your Python code with Blocks \| PyData NYC 2022](https://www.youtube.com/watch?v=sR9fNHfOETw)
 
 # 8.Prefect Cloud and Additional Resources
+
+See [DE Zoomcamp 2.2.7 - Prefect Cloud/Additional resources](https://www.youtube.com/watch?v=gGC23ZK7lr8).
 
 We will see:
 
 - Using Prefect Cloud instead of local Prefect
 - Workspaces
 - Running flows on GCP
+
+Recommended links:
+
+- [Prefect docs](https://docs.prefect.io/)
+- [Prefect Discourse](https://discourse.prefect.io/)
+- [Prefect Cloud](https://app.prefect.cloud/)
+- [Prefect Slack](https://prefect-community.slack.com/)
+- [Anna Geller GutHub](https://github.com/anna-geller)
