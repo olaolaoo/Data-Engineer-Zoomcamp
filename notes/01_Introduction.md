@@ -12,7 +12,12 @@
 
 # 2、Docker + Postgres
 
-Docker可以运行不同的容器，主要是在其中运行postgres容器和启动它，启动后，就可以使用docker制作pipeline（灌入数据？？）见2.6正式使用
+***当我们谈论 Docker 时，可以把它想象成一个轻量级的虚拟化工具，用于将应用程序和它们的依赖打包到一个可移植的容器中。这个容器包括了应用程序的所有必需组件，如代码、运行时、系统工具、库等。解决了在不同环境中出现因为软件版本、依赖等问题而导致的运行时错误。Docker 提供了一种轻松管理和交付应用程序的方式，使得应用程序在不同的环境中表现一致。***
+
+* ***容器(Container):** Docker 容器是一个轻量级、独立、可执行的软件包，包含了运行一个应用程序所需的一切：代码、运行时、系统工具、库以及设置，相当于安装好的系统*，Docker containers are **_stateless_**，任何修改都不会被保存，如果你想存储信息，常见的做法是通过volumes
+* ***镜像(Image):** 镜像是一个**只读**的模板，相当于安装光盘，用于创建容器。它包含了应用程序运行所需的所有信息。*
+
+> 主要是在其中运行postgres容器和启动它，启动后，就可以使用docker制作pipeline（灌入数据）见2.6正式使用
 
 ## 2.1.What's docker
 
@@ -22,7 +27,7 @@ Docker可以运行不同的容器，主要是在其中运行postgres容器和启
 
 A **Docker image** is a _snapshot_ of a container that we can define to run our software, or in this case our data pipelines. By exporting our Docker images to Cloud providers such as Amazon Web Services or Google Cloud Platform we can run our containers there.
 
-Docker provides the following advantages:？？？
+Docker provides the following advantages:
 
 - Reproducibility
 - Local experiment
@@ -37,38 +42,32 @@ Docker containers are **_stateless_**: any changes done inside a container will 
 
 ## 2.2.Creating a custom pipeline with Docker
 
-**do all the things in Mac Terminal after setting up docker on your Mac:**
+### (1) how to use Docker
 
-- `docker run -d -p 80:80 docker/getting-started`
+**setting up docker on your Mac**
 
-(base) papa@papadeMacBook-Pro de %
+The first thing you need to do is to set docker up on your Mac if you are using a macbook. [in this link](https://github.com/ziritrion/ml-zoomcamp/blob/11_kserve/notes/05b_virtenvs.md#docker)
+
+**do all the things in Mac Terminal**, and see what happens in your Docker desktop
+
+- `docker run -d -p 80:80 docker/getting-started`，打开某个容器
 
 - `docker run hello-world`
 
-(base) papa@papadeMacBook-Pro de %
+- `docker run -it ubuntu bash` , 运行容器，终端进入容器shell
 
-- `docker run -it ubuntu bash`
+- `docker run -it python:3.9`, 直接进入 python
 
-root@8516dbfbc42b:/#
-In this situation, if we do something stupid, the host machine is not affected by it. This is what isolation actually means.
-root@8516dbfbc42b:/# exit
+- `docker run -it --entrypoint=bash python:3.9`, 运行容器，终端进入容器shell,不直接进入 python，进入 容器shell root@容器编码:/# ，如果想要进入 python，需要输入 python
 
-- `docker run -it python:3.9`
+-  `docker build -t test:pandas .`create a container named test:pandas
+   * "test:pandas" means image name
+   * "." represents in current path
+   * 重新打开 docker run -t test:pandas argument（for example: docker run -t test:pandas 1)
 
-直接进入 python
+### **(2)Let's create an example pipeline. **
 
-- `docker run -it --entrypoint=bash python:3.9`
-
-不直接进入 python，进入 root@864775ebb19f:/# ，如果想要进入 python，需要输入 python
-
--  `docker build -t test:pandas .`
-
-create a container named test:pandas
-test:pandas means image name
-. represents in current path
-重新打开 docker run -t test:pandas argument（docker run -t test:pandas 1)
-
-**Let's create an example pipeline. We will create a dummy `pipeline.py` Python script that receives an argument and prints it.**
+**We will create a dummy `pipeline.py` Python script that receives an argument and prints it.**
 
 ```python
 import sys
@@ -92,7 +91,11 @@ We can run this script with `python pipeline.py <some_number>` and it should pri
 - `['pipeline.py', '<some_number>']`
 - `job finished successfully for day = <some_number>`
 
-Let's containerize it by creating a Docker image. Create the folllowing `Dockerfile` file:
+<img src="images/01_intra01.png" alt="output" style="zoom:70%;" />
+
+
+
+创建镜像：Let's containerize it by creating a Docker image. Create the folllowing `Dockerfile` file:
 
 ```dockerfile
 # base Docker image that we will build on
@@ -101,7 +104,7 @@ FROM python:3.9.1
 # set up our image by installing prerequisites; pandas in this case
 RUN pip install pandas
 
-# set up the working directory inside the container
+# set up the working directory inside the container.This means that all the following commands will be executed in the /app directory inside the container. If the directory doesn't exist, Docker will create it.
 WORKDIR /app
 # copy the script to the container. 1st name is source file, 2nd is destination
 COPY pipeline.py pipeline.py
@@ -109,9 +112,12 @@ COPY pipeline.py pipeline.py
 # define what to do first when the container runs
 # in this example, we will just run the script
 ENTRYPOINT ["python", "pipeline.py"]
+
+# 进入bash命令行模式   
+#ENTRYPOINT ["bash"]
 ```
 
-Let's build the image:
+Let's build the image(将上面建立的Dockerfile，pipeline.py放在终端当下运行的文件夹内):
 
 ```ssh
 docker build -t test:pandas .
@@ -119,7 +125,9 @@ docker build -t test:pandas .
 
 - The image name will be `test` and its tag will be `pandas`. If the tag isn't specified it will default to `latest`.
 
-We can now run the container and pass an argument to it, so that our pipeline will receive it:
+
+
+运行容器：We can now run the container and pass an argument to it, so that our pipeline will receive it:
 
 ```ssh
 docker run -it test:pandas some_number
@@ -133,13 +141,13 @@ You should get the same output you did when you ran the pipeline script by itsel
 
 _([Video source](https://www.youtube.com/watch?v=2JM-ziJt0WI&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=4))_
 
-==**docker中打开-->在terminal中登入**==
+***<u>简单来说，分两部分，分别是open in Docker; log in in the terminal</u>***
 
 You can run a containerized version of Postgres that doesn't require any installation steps. You only need to provide a few _environment variables_ to it as well as a _volume_ for storing data.
 
-### **Step1:新建文件夹ny_taxi_postgres_data**
+### **Step1:create a new folder named ny_taxi_postgres_data**
 
-==可能出现的问题==：文件位置建立在icloud上了，不同电脑之间同步了，不过容器每次都要重新建立，后面换电脑操作出问题了，解决方法换路径建在本地就行了，我建在了用户文件夹下:`/Users/ola/ny_taxi_postgres_data`
+==Possible issues(可能出现的问题)==：文件位置建立在icloud上了，不同电脑之间同步了，不过容器每次都要重新建立，后面换电脑操作出问题了，解决方法换路径建在本地就行了，我建在了用户文件夹下:`/Users/ola/ny_taxi_postgres_data`
 
 ```bash
 PostgreSQL Database directory appears to contain a database; Skipping initialization
@@ -147,8 +155,6 @@ PostgreSQL Database directory appears to contain a database; Skipping initializa
 2023-03-11 01:11:22.674 UTC [1] FATAL:  could not open directory "pg_notify": No such file or directory
 2023-03-11 01:11:22.679 UTC [1] LOG:  database system is shut down
 ```
-
-
 
 Create a folder anywhere you'd like for Postgres to store data in. We will use the example folder `ny_taxi_postgres_data`. Here's how to run the container:
 
@@ -171,7 +177,7 @@ docker run -it \
 - `-v` points to the volume directory. The colon `:` separates the first part (path to the folder in the host computer) from the second part (path to the folder inside the container).
   - Path names must be absolute. If you're in a UNIX-like system, you can use `pwd` to print you local folder as a shortcut; this example should work with both `bash` and `zsh` shells, but `fish` will require you to remove the `$`.
   - This command will only work if you run it from a directory which contains the `ny_taxi_postgres_data` subdirectory you created above.
-- The `-p` is for port mapping（端口映射）. We map the default Postgres port to the same port in the host.  **-p HOST_PORT:CONTAINER_PORT**
+-  `-p` is for port mapping（端口映射）. We map the default Postgres port to the same port in the host.  **-p HOST_PORT:CONTAINER_PORT**
 - `--name`， 是容器的名字，如果不写的话，会随机生成一个
 - The last argument is the image name and tag. We run the official `postgres` image on its version `13`.
 
@@ -185,14 +191,16 @@ Once the container is running, we can log into our database with [pgcli](https:/
 pgcli -h localhost -p 5432 -u root -d ny_taxi
 ```
 
-- `pgcli`pgclient，是一个python的library ，可以使用pip install pgcli 安装，
+- `pgcli`pgclient，是一个python的library ，如果没有，可以使用pip install pgcli 安装，
 - `-h` is the host. Since we're running locally we can use `localhost`.
 - `-p` is the port.
 - `-u` is the username.
 - `-d` is the database name.
 - The password is not provided; it will be requested after running the command.
 
-==可能出现的问题：==电脑没有安装pgcli，导致启动不了
+![output](images/01_intra02.png)
+
+==Possible issues（可能出现的问题）：==电脑没有安装pgcli，导致启动不了
 
 ```bash
 (base) ola@192 ~ % pgcli -h localhost -p 5432 -u root -d ny_taxi
@@ -205,7 +213,11 @@ zsh: command not found: pgcli
 
 ([*Video source*](https://www.youtube.com/watch?v=2JM-ziJt0WI&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=4))
 
-==**在docker中打开postgres-->在jupyter中导入数据**==
+==**在docker中打开postgres-->在jupyter中导入数据**==， my Jupyter Notebook of this step is [in this link](../1_basics_setup/1_docker_postgres/upload-data-parquet.ipynb)
+
+一步一步来，第一步网页下载数据，第二步将本地数据表传到2.3建立的本地数据库
+
+![output](images/01_intra03.png)
 
 We will now create a Jupyter Notebook `upload-data.ipynb` file which we will use to read a CSV file and export it to Postgres. But According to the [TLC data website](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page), from 05/13/2022, the data will be in `.parquet` format instead of `.csv` The website has provided a useful [link](https://www1.nyc.gov/assets/tlc/downloads/pdf/working_parquet_format.pdf) with sample steps to read `.parquet` file and convert it to Pandas data frame.
 
@@ -217,9 +229,9 @@ Check the completed `upload-data.ipynb` [in this link](../1_intro/upload-data.ip
 
 _([Video source](https://www.youtube.com/watch?v=hCAIVe9N0ow&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=5))_
 
-==**有pgAdmin和Postgres在相同的virtual Docker networ中-->在pgAdmin中找到Postgres**==
+==**有pgAdmin和Postgres在相同的virtual Docker networ中-->在pgAdmin中找到本地的Postgres中的数据库**==
 
-`pgcli` is a handy tool but it's cumbersome to use. [`pgAdmin` is a web-based tool](https://www.pgadmin.org/) that makes it more convenient to access and manage our databases. It's possible to run pgAdmin  as container along with the Postgres container, **but both containers will have to be in the same _virtual network_ so that they can find each other.**
+`pgcli` is a handy tool but it's cumbersome（繁琐） to use. [`pgAdmin` is a web-based tool](https://www.pgadmin.org/) that makes it more convenient to access and manage our databases. It's possible to run pgAdmin  as container along with the Postgres container, **but both containers will have to be in the same _virtual network_ so that they can find each other.**
 
 Let's create a virtual Docker network called `pg-network`:
 
@@ -229,7 +241,7 @@ docker network create pg-network
 
 >You can remove the network later with the command `docker network rm pg-network` . You can look at the existing networks with `docker network ls` .
 
-We will now re-run our Postgres container with the added network name and the container network name, so that the pgAdmin container can find it (we'll use `pg-database` for the container name):
+==先在Docker桌面端关闭2.3中运行的容器。==We will now re-run our Postgres container with the added network name and the container network name, so that the pgAdmin container can find it (we'll use `pg-database-network` for the container name):
 
 ```bash
 docker run -it \
@@ -239,7 +251,7 @@ docker run -it \
     -v $(pwd)/ny_taxi_postgres_data:/var/lib/postgresql/data \
     -p 5432:5432 \
     --network=pg-network \
-    --name pg-database \
+    --name pg-database-network \
     postgres:13
 ```
 
