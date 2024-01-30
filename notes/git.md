@@ -17,3 +17,11 @@ git add .gitignore
 git commit -m "Add .gitignore file" 
 
 git push
+
+
+
+git rm --cached '**/.DS_Store'
+
+git commit -m "Remove .DS_Store  from tracking"
+
+git push
