@@ -2,9 +2,13 @@
 
 # 1、Introduction
 
-**Data Engineering** is the design and development of systems for collecting, storing and analyzing data at scale.（**数据工程**是用于大规模收集，存储和分析数据的系统的设计和开发）
+> **数据工程**是用于大规模收集，存储和分析数据的系统的设计和开发
+
+**Data Engineering** is the design and development of systems for collecting, storing and analyzing data at scale.
 
 ## Data pipeline
+
+> data pipeline 是一种服务，接收数据，输出数据
 
 **A data pipeline** is a service that receives data as input and outputs more data（一种接收数据作为输入并输出更多数据的服务）. For example, reading a CSV file, transforming the data somehow and storing it as a table in a PostgreSQL database.
 
@@ -12,10 +16,11 @@
 
 # 2、Docker + Postgres
 
-***当我们谈论 Docker 时，可以把它想象成一个轻量级的虚拟化工具，用于将应用程序和它们的依赖打包到一个可移植的容器中。这个容器包括了应用程序的所有必需组件，如代码、运行时、系统工具、库等。解决了在不同环境中出现因为软件版本、依赖等问题而导致的运行时错误。Docker 提供了一种轻松管理和交付应用程序的方式，使得应用程序在不同的环境中表现一致。***
+> 当我们谈论 Docker 时，可以把它想象成一个轻量级的虚拟化工具，用于将应用程序和它们的依赖打包到一个可移植的容器中。这个容器包括了应用程序的所有必需组件，如代码、运行时、系统工具、库等。解决了在不同环境中出现因为软件版本、依赖等问题而导致的运行时错误。Docker 提供了一种轻松管理和交付应用程序的方式，使得应用程序在不同的环境中表现一致。
 
-* ***容器(Container):** Docker 容器是一个轻量级、独立、可执行的软件包，包含了运行一个应用程序所需的一切：代码、运行时、系统工具、库以及设置，相当于安装好的系统*，Docker containers are **_stateless_**，任何修改都不会被保存，如果你想存储信息，常见的做法是通过volumes
-* ***镜像(Image):** 镜像是一个**只读**的模板，相当于安装光盘，用于创建容器。它包含了应用程序运行所需的所有信息。*
+> * ***容器(Container):** Docker 容器是一个轻量级、独立、可执行的软件包，包含了运行一个应用程序所需的一切：代码、运行时、系统工具、库以及设置，相当于安装好的系统*，Docker containers are **_stateless_**，任何修改都不会被保存，如果你想存储信息，常见的做法是通过volumes
+> * ***镜像(Image):** 镜像是一个**只读**的模板，相当于安装光盘，用于创建容器。它包含了应用程序运行所需的所有信息。*
+>
 
 > 主要是在其中运行postgres容器和启动它，启动后，就可以使用docker制作pipeline（灌入数据）见2.6正式使用
 
@@ -40,9 +45,17 @@ Docker containers are **_stateless_**: any changes done inside a container will 
 
 > Note: you can learn more about Docker and how to set it up on a Mac [in this link](https://github.com/ziritrion/ml-zoomcamp/blob/11_kserve/notes/05b_virtenvs.md#docker). You may also be interested in a [Docker reference cheatsheet](https://gist.github.com/ziritrion/1842c8a4c4851602a8733bba19ab6050#docker).
 
-## 2.2.Creating a custom pipeline with Docker
+## 2.2.Creating a simple pipeline in Docker
 
-### (1) how to use Docker
+> 语法：
+>
+> docker run -it 运行
+>
+> docker build -t 新建
+>
+> Dockerfile，python脚本，执行命令都在一个目录下
+
+**(1) how to use Docker**
 
 **setting up docker on your Mac**
 
@@ -50,22 +63,28 @@ The first thing you need to do is to set docker up on your Mac if you are using 
 
 **do all the things in Mac Terminal**, and see what happens in your Docker desktop
 
-- `docker run -d -p 80:80 docker/getting-started`，打开某个容器
+- `docker run -d -p 80:80 docker/getting-started`
+  - 打开某个容器，-d后台（detached）模式运行容器，不占用当前终端。
 
 - `docker run hello-world`
 
-- `docker run -it ubuntu bash` , 运行容器，终端进入容器shell
+- `docker run -it ubuntu bash` 
+  - 运行容器，终端进入容器shell
 
-- `docker run -it python:3.9`, 直接进入 python
+- `docker run -it python:3.9`
+  - 运行容器，直接进入 python
 
-- `docker run -it --entrypoint=bash python:3.9`, 运行容器，终端进入容器shell,不直接进入 python，进入 容器shell root@容器编码:/# ，如果想要进入 python，需要输入 python
+- `docker run -it --entrypoint=bash python:3.9`
+  - 运行容器，终端进入容器shell,不直接进入 python，进入 容器shell root@容器编码:/# ，如果想要进入 python，需要输入 python，如果python：3.9这个image中import pandas失败，需要进入这个镜像的终端，pip install pandas，下次再进入这个镜像，仍然没有pandas
 
--  `docker build -t test:pandas .`create a container named test:pandas
-   * "test:pandas" means image name
-   * "." represents in current path
-   * 重新打开 docker run -t test:pandas argument（for example: docker run -t test:pandas 1)
+- `docker build -t test:pandas .`
+   - 新建镜像
+   - "test:pandas" means image name
+   - "." represents in current path当前目录下查找 `Dockerfile` 文件进行构建，所以需要新建一个Dockerfile哦
+   - 重新打开 docker run -t test:pandas argument（for example: docker run -t test:pandas 1)
 
-### **(2)Let's create an example pipeline. **
+
+**(2)Let's create an example pipeline. **
 
 **We will create a dummy `pipeline.py` Python script that receives an argument and prints it.**
 
@@ -76,7 +95,7 @@ import pandas # we don't need this but it's useful for the example
 # print arguments
 print(sys.argv)
 
-# argument 0 is the name os the file
+# argument 0 is the name of the python file
 # argumment 1 contains the actual first argument we care about
 day = sys.argv[1]
 
@@ -86,16 +105,18 @@ day = sys.argv[1]
 print(f'job finished successfully for day = {day}')
 ```
 
-We can run this script with `python pipeline.py <some_number>` and it should print 2 lines:
+* 不使用docker，We can run this script with `python pipeline.py <some_number>` and it should print 2 lines:
 
-- `['pipeline.py', '<some_number>']`
-- `job finished successfully for day = <some_number>`
+  - `['pipeline.py', '<some_number>']`
+
+  - `job finished successfully for day = <some_number>`
+
 
 <img src="images/01_intra01.png" alt="output" style="zoom:70%;" />
 
 
 
-创建镜像：Let's containerize it by creating a Docker image. Create the folllowing `Dockerfile` file:
+* 使用daocker，创建镜像：Let's containerize it by creating a Docker image. Create the folllowing `Dockerfile` file:
 
 ```dockerfile
 # base Docker image that we will build on
@@ -125,8 +146,6 @@ docker build -t test:pandas .
 
 - The image name will be `test` and its tag will be `pandas`. If the tag isn't specified it will default to `latest`.
 
-
-
 运行容器：We can now run the container and pass an argument to it, so that our pipeline will receive it:
 
 ```ssh
@@ -137,15 +156,15 @@ You should get the same output you did when you ran the pipeline script by itsel
 
 > Note: these instructions asume that `pipeline.py` and `Dockerfile` are in the same directory. The Docker commands should also be run from the same directory as these files.
 
-## 2.3、Running Postgres in a container
+## 2.3、Running Postgres locally with Docker
 
-_([Video source](https://www.youtube.com/watch?v=2JM-ziJt0WI&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=4))_
+_([Video source](https://www.youtube.com/watch?v=2JM-ziJt0WI&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb))_
 
-***<u>简单来说，分两部分，分别是open in Docker; log in in the terminal</u>***
+> 如果遇到连接postgres数据库的问题，查看[link](https://www.youtube.com/watch?v=3IkfkTwqHx4&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
 You can run a containerized version of Postgres that doesn't require any installation steps. You only need to provide a few _environment variables_ to it as well as a _volume_ for storing data.
 
-### **Step1:create a new folder named ny_taxi_postgres_data**
+**Step1:create a new folder named ny_taxi_postgres_data**
 
 ==Possible issues(可能出现的问题)==：文件位置建立在icloud上了，不同电脑之间同步了，不过容器每次都要重新建立，后面换电脑操作出问题了，解决方法换路径建在本地就行了，我建在了用户文件夹下:`/Users/ola/ny_taxi_postgres_data`
 
@@ -163,7 +182,7 @@ docker run -it \
     -e POSTGRES_USER="root" \
     -e POSTGRES_PASSWORD="root" \
     -e POSTGRES_DB="ny_taxi" \
-    -v $(pwd)/ny_taxi_postgres_data:/var/lib/postgresql/data \
+    -v /Users/ola/ny_taxi_postgres_data:/var/lib/postgresql/data \
     -p 5432:5432 \
     --name pg-database \
     postgres:13
@@ -172,16 +191,16 @@ docker run -it \
 - The container needs 3 environment variables:
   - `POSTGRES_USER` is the username for logging into the database. We chose `root`.
   - `POSTGRES_PASSWORD` is the password for the database. We chose `root`
-    - **_IMPORTANT: These values are only meant for testing. Please change them for any serious project._**
+    - _IMPORTANT: These values are only meant for testing. Please change them for any serious project._
   - `POSTGRES_DB` is the name that we will give the database. We chose `ny_taxi`.
-- `-v` points to the volume directory. The colon `:` separates the first part (path to the folder in the host computer) from the second part (path to the folder inside the container).
+- `-v` points to the volume directory. The colon `:` separates the first part (path to the folder in the host computer) from the second part (path to the folder inside the container).这是一个卷挂载，用于将容器内的 PostgreSQL 数据库数据持久化到主机上的目录，之前的数据不会保存在容器中。将存储数据到本地，下次打开postgres可以继续使用
   - Path names must be absolute. If you're in a UNIX-like system, you can use `pwd` to print you local folder as a shortcut; this example should work with both `bash` and `zsh` shells, but `fish` will require you to remove the `$`.
   - This command will only work if you run it from a directory which contains the `ny_taxi_postgres_data` subdirectory you created above.
 -  `-p` is for port mapping（端口映射）. We map the default Postgres port to the same port in the host.  **-p HOST_PORT:CONTAINER_PORT**
 - `--name`， 是容器的名字，如果不写的话，会随机生成一个
 - The last argument is the image name and tag. We run the official `postgres` image on its version `13`.
 
-### **Step2:打开postgres**
+**Step2:打开postgres**
 
 Once the container is running, we can log into our database with [pgcli](https://www.pgcli.com/) with the following command:
 
@@ -191,7 +210,7 @@ Once the container is running, we can log into our database with [pgcli](https:/
 pgcli -h localhost -p 5432 -u root -d ny_taxi
 ```
 
-- `pgcli`pgclient，是一个python的library ，如果没有，可以使用pip install pgcli 安装，
+- `pgcli`pgclient，*Pgcli* is a command line interface for Postgres，是一个python的library ，如果没有，可以使用pip install pgcli 安装，
 - `-h` is the host. Since we're running locally we can use `localhost`.
 - `-p` is the port.
 - `-u` is the username.
@@ -209,27 +228,33 @@ zsh: command not found: pgcli
 
 解决方法：在终端输入`pip install pgcli`，安装，但是又出现问题了，显示没有 install psycopg2-binary，解决方法，一劳永逸，换电脑直接执行库包安装：requirements.txt，写入库名和版本，执行`pip install -r requirements.txt`
 
-## 2.4、Ingesting data to Postgres with Python
+## 2.4、Using the ingestion Jupyter notebook 
 
-([*Video source*](https://www.youtube.com/watch?v=2JM-ziJt0WI&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=4))
+([*Video source*](https://www.youtube.com/watch?v=2JM-ziJt0WI&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb))
 
-==**在docker中打开postgres-->在jupyter中导入数据**==， my Jupyter Notebook of this step is [in this link](../1_basics_setup/1_docker_postgres/upload-data-parquet.ipynb)
+> **在docker中打开postgres容器-->在jupyter中导入数据**
 
 一步一步来，第一步网页下载数据，第二步将本地数据表传到2.3建立的本地数据库
-
-![output](images/01_intra03.png)
 
 We will now create a Jupyter Notebook `upload-data.ipynb` file which we will use to read a CSV file and export it to Postgres. But According to the [TLC data website](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page), from 05/13/2022, the data will be in `.parquet` format instead of `.csv` The website has provided a useful [link](https://www1.nyc.gov/assets/tlc/downloads/pdf/working_parquet_format.pdf) with sample steps to read `.parquet` file and convert it to Pandas data frame.
 
 > Note: knowledge of Jupyter Notebook, Python environment management and Pandas is asumed in these notes. Please check [this link](https://gist.github.com/ziritrion/9b80e47956adc0f20ecce209d494cd0a#pandas) for a Pandas cheatsheet and [this link](https://gist.github.com/ziritrion/8024025672ea92b8bdeb320d6015aa0d) for a Conda cheatsheet for Python environment management.
 
-Check the completed `upload-data.ipynb` [in this link](../1_intro/upload-data.ipynb) for a detailed guide. Feel free to copy the file to your work directory; in the same directory you will need to have the CSV file linked above and the `ny_taxi_postgres_data` subdirectory.
+* .parquet:  `upload-data.ipynb` [in this link](../01_basics_setup/2_docker_sql/upload-data.ipynb)for a detailed guide. 
 
-## 2.5、Connecting pgAdmin and Postgres with Docker networking
+* .csv:`upload-data-csv.ipynb` [in this link](../01_basics_setup/2_docker_sql/other_file/upload-data-csv.ipynb)for a detailed guide. 
 
-_([Video source](https://www.youtube.com/watch?v=hCAIVe9N0ow&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=5))_
+what you can get after doing things up there:
 
-==**有pgAdmin和Postgres在相同的virtual Docker networ中-->在pgAdmin中找到本地的Postgres中的数据库**==
+![output](images/01_intra03.png)
+
+Ps: 也可以直接在终端中输入下载数据`wget https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2021-01.parquet`
+
+## 2.5、Putting two container in one network with Docker network
+
+_([Video source](https://www.youtube.com/watch?v=hCAIVe9N0ow&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb))_
+
+> ==**pgAdmin和Postgres在相同的virtual Docker networ中，使它们找到对方-->在pgAdmin中找到本地的Postgres中的数据库**==
 
 `pgcli` is a handy tool but it's cumbersome（繁琐） to use. [`pgAdmin` is a web-based tool](https://www.pgadmin.org/) that makes it more convenient to access and manage our databases. It's possible to run pgAdmin  as container along with the Postgres container, **but both containers will have to be in the same _virtual network_ so that they can find each other.**
 
@@ -241,17 +266,17 @@ docker network create pg-network
 
 >You can remove the network later with the command `docker network rm pg-network` . You can look at the existing networks with `docker network ls` .
 
-==先在Docker桌面端关闭2.3中运行的容器。==We will now re-run our Postgres container with the added network name and the container network name, so that the pgAdmin container can find it (we'll use `pg-database-network` for the container name):
+==先在Docker桌面端删除2.3中运行的容器，因为名字一样，啊！有冲突。-v使用相同通过的文件夹，2.4灌入的数据不会丢==We will now re-run our Postgres container with the added network name and the container network name, so that the pgAdmin container can find it (we'll use `pg-database` for the container name):
 
 ```bash
 docker run -it \
     -e POSTGRES_USER="root" \
     -e POSTGRES_PASSWORD="root" \
     -e POSTGRES_DB="ny_taxi" \
-    -v $(pwd)/ny_taxi_postgres_data:/var/lib/postgresql/data \
+    -v /Users/ola/ny_taxi_postgres_data:/var/lib/postgresql/data \
     -p 5432:5432 \
     --network=pg-network \
-    --name pg-database-network \
+    --name pg-database \
     postgres:13
 ```
 
@@ -272,7 +297,7 @@ docker run -it \
 * Just like with the Postgres container, we specify a network and a name. However, the name in this example isn't really necessary because there won't be any containers trying to access this particular container.
 * The actual image name is `dpage/pgadmin4` .
 
-You should now be able to load pgAdmin on a web browser by browsing to `localhost:8080`. Use the same email and password you used for running the container to log in.
+You should now be able to load pgAdmin on a web browser by browsing to  `localhost:8080`. Use the same email and password you used for running the container to log in.
 
 Right-click on _Servers_ on the left sidebar and select _Create_ > _Server..._
 
@@ -287,15 +312,77 @@ Click on _Save_. You should now be connected to the database.
 
 We will explore using pgAdmin in later lessons.
 
-## 2.6、Using the ingestion script with Docker
+## 2.6、Running multiple containers with Docker-compose
 
-==**在docker中链接postgres-->Python script--> terminal 中执行Python script**==
+_([Video source](https://www.youtube.com/watch?v=hKI6PkPhpa0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb))_
+
+> 以下重新建立了新的容器，与2.5不一样，所以需要重新在pgadmin中建立新的server
+
+`docker-compose` allows us to launch multiple containers using a single configuration file, so that we don't have to run multiple complex `docker run` commands separately.
+
+Docker compose makes use of YAML files. Here's the `docker-compose.yaml` file for running the Postgres and pgAdmin containers:
+
+```yaml
+services:
+  pgdatabase:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=ny_taxi
+    volumes:
+      - "/Users/ola/ny_taxi_postgres_data:/var/lib/postgresql/data:rw"
+    ports:
+      - "5432:5432"
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+    volumes:
+      - "/Users/ola/data_pgadmin:/var/lib/pgadmin"
+    ports:
+      - "8080:80"
+```
+
+* We don't have to specify a network because `docker-compose` takes care of it: every single container (or "service", as the file states) will run withing the same network and will be able to find each other according to their names (`pgdatabase` and `pgadmin` in this example).
+* We've added a volume for pgAdmin to save its settings, so that you don't have to keep re-creating the connection to Postgres every time you rerun the container. Make sure you create a `data_pgadmin` directory in your work folder where you run `docker-compose` from.
+* All other details from the `docker run` commands (environment variables, volumes and ports) are mentioned accordingly in the file following YAML syntax.
+
+We can now run Docker compose by running the following command from the same directory where `docker-compose.yaml` is found. ==**Make sure that all previous containers aren't running anymore**:==
+
+```bash
+docker-compose up
+```
+
+You will have to press `Ctrl+C` in order to shut down the containers. The proper way of shutting them down is with this command:
+
+```bash
+docker-compose down
+```
+
+And if you want to run the containers again in the background rather than in the foreground (thus freeing up your terminal), you can run them in detached mode:
+
+```bash
+docker-compose up -d
+```
+
+If you want to run the dockerized ingest script when you run Postgres and pgAdmin with `docker-compose`, you will have to find the name of the virtual network that Docker compose created for the containers. You can use the command `docker network ls` to find it and then change the `docker run` command for the dockerized script to include the network name.
+
+
+
+## 2.7、Using the ingestion script with Docker
+
+> 1. 在docker中打开2.6中的容器，删除数据库中相同库表的数据，也可以不删除，会被替换
+> 2. 建立Python script
+> 3. 建立docker image
+> 4. 打开docker container，加入参数，执行python script
 
 _([Video source](https://www.youtube.com/watch?v=B1WwATwf-vY&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=8))_
 
 We will now export the Jupyter notebook file to a regular Python script and use Docker to run it.
 
-### 测试：Exporting and testing the script
+**测试：Exporting and testing the script**
 
 **Step1:撰写py文档**
 
@@ -320,12 +407,12 @@ Clean up the script by removing everything we don't need. We will also rename it
     ```
 * We will also download the Parquet using the provided URL argument.
 
-You can check the completed `ingest_data.py` script [in this link](../1_basics_setup/1_docker_postgres/ingest_data_parquet.py).
+You can check the completed `ingest_data.py` script [in this link](../01_basics_setup/2_docker_sql/ingest_data.py).
 
 In order to test the script we will have to drop the table we previously created. In pgAdmin, in the sidebar navigate to _Servers > Docker localhost > Databases > ny_taxi > Schemas > public > Tables > yellow_taxi_trips_, right click on _yellow_taxi_trips_ and select _Query tool_. Introduce the following command:
 
 ```sql
-DROP TABLE yellow_taxi_trips;
+DROP TABLE yellow_taxi_data;
 ```
 
 **Step2:导入数据**
@@ -339,7 +426,7 @@ python ingest_data_parquet.py \
     --host=localhost \
     --port=5432 \
     --db=ny_taxi \
-    --table_name=yellow_taxi_trips \
+    --table_name=yellow_taxi_data \
     --url="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2021-01.parquet"
 ```
 Back in pgAdmin, refresh the Tables and check that `yellow_taxi_trips` was created. You can also run a SQL query to check the contents:
@@ -348,13 +435,13 @@ Back in pgAdmin, refresh the Tables and check that `yellow_taxi_trips` was creat
 SELECT
     COUNT(1)
 FROM
-    yellow_taxi_trips;
+    yellow_taxi_data;
 ```
 * This query should return 1369769 rows.
 
-### 正式使用docker：Dockerizing the script
+**正式使用docker：Dockerizing the script**
 
-Let's modify the [Dockerfile we created before](#creating-a-custom-pipeline-with-docker) to include our `ingest_data.py` script and create a new image:
+Let's modify the [Dockerfile we created before to include our `ingest_data.py` script and create a new image:
 
 ```dockerfile
 FROM python:3.9.1
@@ -362,7 +449,7 @@ FROM python:3.9.1
 # We need to install wget to download the csv file
 RUN apt-get install wget
 # psycopg2 is a postgres db adapter for python: sqlalchemy needs it
-RUN pip install pandas sqlalchemy psycopg2
+RUN pip install pandas sqlalchemy psycopg2 pyarrow
 
 WORKDIR /app
 COPY ingest_data.py ingest_data.py 
@@ -380,81 +467,20 @@ And run it:
 
 ```bash
 docker run -it \
-    --network=pg-network \
+    --network=2_docker_sql_default \
     taxi_ingest:v001 \
     --user=root \
     --password=root \
-    --host=pg-database \
+    --host=pgdatabase \
     --port=5432 \
     --db=ny_taxi \
-    --table_name=yellow_taxi_trips \
+    --table_name=yellow_taxi_data \
     --url="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2021-01.parquet"
 ```
 
-* We need to provide the network for Docker to find the Postgres container. It goes before the name of the image.
-* Since Postgres is running on a separate container, the host argument will have to point to the container name of Postgres.
-* You can drop the table in pgAdmin beforehand if you want, but the script will automatically replace the pre-existing table.
-
-## 2.7、Running Postgres and pgAdmin with Docker-compose
-
-_([Video source](https://www.youtube.com/watch?v=hKI6PkPhpa0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=7))_
-
-
-
-`docker-compose` allows us to launch multiple containers using a single configuration file, so that we don't have to run multiple complex `docker run` commands separately.
-
-Docker compose makes use of YAML files. Here's the `docker-compose.yaml` file for running the Postgres and pgAdmin containers:
-
-```yaml
-services:
-  pgdatabase:
-    image: postgres:13
-    environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=ny_taxi
-    volumes:
-      - "./ny_taxi_postgres_data:/var/lib/postgresql/data:rw"
-    ports:
-      - "5432:5432"
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=root
-    volumes:
-      - "./data_pgadmin:/var/lib/pgadmin"
-    ports:
-      - "8080:80"
-```
-
-* We don't have to specify a network because `docker-compose` takes care of it: every single container (or "service", as the file states) will run withing the same network and will be able to find each other according to their names (`pgdatabase` and `pgadmin` in this example).
-* We've added a volume for pgAdmin to save its settings, so that you don't have to keep re-creating the connection to Postgres every time you rerun the container. Make sure you create a `data_pgadmin` directory in your work folder where you run `docker-compose` from.
-* All other details from the `docker run` commands (environment variables, volumes and ports) are mentioned accordingly in the file following YAML syntax.
-
-We can now run Docker compose by running the following command from the same directory where `docker-compose.yaml` is found. ==**Make sure that all previous containers aren't running anymore**:==
-
-```bash
-docker-compose up
-```
-
->Note: this command asumes that the `ny_taxi_postgres_data` used for mounting the volume is in the same directory as `docker-compose.yaml`.
-
-==另一种方法==：Since the settings for pgAdmin were stored within the container and we have killed the previous onem you will have to re-create the connection by following the steps [in this section](##2.5、connecting-pgadmin-and-postgres-with-docker-networking).
-
-You will have to press `Ctrl+C` in order to shut down the containers. The proper way of shutting them down is with this command:
-
-```bash
-docker-compose down
-```
-
-And if you want to run the containers again in the background rather than in the foreground (thus freeing up your terminal), you can run them in detached mode:
-
-```bash
-docker-compose up -d
-```
-
-If you want to re-run the dockerized ingest script when you run Postgres and pgAdmin with `docker-compose`, you will have to find the name of the virtual network that Docker compose created for the containers. You can use the command `docker network ls` to find it and then change the `docker run` command for the dockerized script to include the network name.
+* We need to provide the network for Docker to find the Postgres container. It goes before the name of the image.使用`docker network l
+  s`找到2.6建立的network
+* Since Postgres is running on a separate container, the host argument will have to point to the container name of Postgres.来自2.6
 
 ## 2.8、SQL refresher
 
@@ -732,9 +758,9 @@ _([Video source](https://www.youtube.com/watch?v=Hajwnmj0xfQ&list=PL3MmuxUbc_hJe
 
 During this course we will use [Google Cloud Platform](https://cloud.google.com/) (GCP) as our cloud services provider.
 
-##  3.0. Terraform overview
+##  3.0. Terraform setup
 
-[overview](https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/week_1_basics_n_setup/1_terraform_gcp/1_terraform_overview.md)
+[overview](https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/01-docker-terraform/1_terraform_gcp/1_terraform_overview.md)
 
 使用 Homebrew 包管理器安装。这种方法更为简单，并且可以方便地更新 Terraform 到最新版本。
 
@@ -749,7 +775,7 @@ During this course we will use [Google Cloud Platform](https://cloud.google.com/
    4. 安装Xcode在终端中输入：`sudo rm -rf /Library/Developer/CommandLineTools`；`sudo xcode-select --install`
 4. 检查 Terraform 是否已正确安装：`terraform --version`
 
-## 3.1.GCP initial setup
+## 3.1.GCP  setup
 
 _([Video source](https://www.youtube.com/watch?v=Hajwnmj0xfQ&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=6))_
 
@@ -786,13 +812,19 @@ Please follow these steps:
 
 1. **Download the [GCP SDK](https://cloud.google.com/sdk/docs/quickstart) for local setup**. Follow the instructions to install and connect to your account and project.
 
-   > 安装GCP SDK
+   > 安装GCP SDK，GCP SDK（Google Cloud SDK）是一个用于与 Google Cloud Platform（GCP）进行交互和管理的工具包。它提供了一组命令行工具和库，让开发者能够在**命令行界面（CLI）中执行各种云服务的操作**
 
-   >1、解压到根目录
+   >1、第一步，解压到根目录
    >
-   >2、./google-cloud-sdk/install.sh
+   >2、第二步，在根目录，使用安装脚本将 gcloud CLI 工具添加到您的 `PATH`
    >
-   >3、./google-cloud-sdk/bin/gcloud init
+   >./google-cloud-sdk/install.sh
+   >
+   >3、第三步，如需初始化 gcloud CLI，授权CLI 使用您的用户帐号凭据访问 Google Cloud
+   >
+   >./google-cloud-sdk/bin/gcloud init
+   >
+   >
    >
    >To install or remove components at your current SDK version [420.0.0], run: $ gcloud components install COMPONENT_ID
    >
@@ -829,6 +861,8 @@ Please follow these steps:
 
       ```bash
       gcloud auth application-default login
+      
+      gcloud auth application-default print-access-token
       ```
 
 You should now be ready to work with GCP.
@@ -838,6 +872,8 @@ You should now be ready to work with GCP.
 _([Video source](https://www.youtube.com/watch?v=Hajwnmj0xfQ&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=6))_
 
 In the following chapters we will setup a _Data Lake_ on Google Cloud Storage and a _Data Warehouse_ in BigQuery. We will explore these concepts in future lessons but a Data Lake is where we would usually store data and a Data Warehouse provides a more structured way to access this data.
+
+![获得GCP账户](images/00_gcp.png)
 
  We need to setup access first by assigning the Storage Admin, Storage Object Admin, BigQuery Admin and Viewer IAM roles to the Service Account, and then enable the `iam` and `iamcredentials` APIs for our project.
 
@@ -863,7 +899,7 @@ _([Video source](https://www.youtube.com/watch?v=dNkEgO-CExg&list=PL3MmuxUbc_hJe
 
 There are 2 important components to Terraform: **the code files and Terraform commands**.
 
-###  Terraform configuration
+**Terraform configuration（配置）**
 
 The set of files used to describe infrastructure in Terraform is known as a Terraform ***configuration***. Terraform configuration files end up in :
 
@@ -879,22 +915,31 @@ Here's a basic `main.tf` file written in Terraform language with all of the nece
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
-      version = "3.5.0"
+      source  = "hashicorp/google"
+      version = "5.13.0"
     }
   }
 }
 
 provider "google" {
-  credentials = file("<NAME>.json")
-
-  project = "<PROJECT_ID>"
-  region  = "us-central1"
-  zone    = "us-central1-c"
+  credentials = "./keys/my-creds.json"  # Credentials only needs to be set if you do not have the GOOGLE_APPLICATION_CREDENTIALS set
+  project = "coherent-ascent-379901"
+  region  = "asia-southeastye1"
 }
 
-resource "google_compute_network" "vpc_network" {
-  name = "terraform-network"
+resource "google_storage_bucket" "demo-bucket" {//“资源类型” “桶名称” 
+  name          = "coherent-ascent-379901-terra-bucket"//桶唯一标识unique
+  location      = "asia-southeast1"
+  force_destroy = true
+
+  lifecycle_rule {
+    condition {
+      age = 2 //days
+    }
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+  }
 }
 ```
 
@@ -921,7 +966,7 @@ resource "google_compute_network" "vpc_network" {
     * In this example, the `google_compute_network` resource type has a single mandatory argument called `name`, which is the name that the resource will have within GCP's infrastructure.
       * Do not confuse the _resource name_ with the _`name`_ argument!
 
-### Variables
+**Variables**
 
 Besides these 3 blocks, there are additional available blocks:
 
@@ -984,9 +1029,13 @@ With a configuration ready, you are now ready to create your infrastructure. The
 
 ## 3.4.Creating GCP infrastructure with Terraform
 
-_([Video source](https://www.youtube.com/watch?v=dNkEgO-CExg&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=10))_
+_([Video source](https://www.youtube.com/watch?v=Y2ux7gq3Z0o&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=12))_
 
-### main.tf
+### main.tf 
+
+**看课程视频，很好理解！！*可以通过搜索[terraform google provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) 找到代码***
+
+
 
 We will now create a new `main.tf` file as well as an auxiliary `variables.tf` file with all the blocks we will need for our project.
 
@@ -996,18 +1045,23 @@ In `main.tf` we will configure the `terraform` block as follows:
 
 ```java
 terraform {
-  required_version = ">= 1.0"
-  backend "local" {}
   required_providers {
     google = {
       source  = "hashicorp/google"
+      version = "5.13.0"
     }
   }
+}
+
+provider "google" {
+  credentials = "./keys/my-creds.json"  # Credentials only needs to be set if you do not have the GOOGLE_APPLICATION_CREDENTIALS set
+  project = "coherent-ascent-379901"
+  region  = "asia-southeastye1"
 }
 ```
 
 * The `required_version` field states the minimum Terraform version to be used.
-* The `backend` field states where we'd like to store the _state_ of the infrastructure. `local` means that we'll store it locally in our computers. Alternatively, you could store the state online.
+* The `backend` field states where we'd like to **store the _state_ of the infrastructure**. `local` means that we'll store it locally in our computers. Alternatively, you could store the state online.
 
 The provider will not make use of the `credentials` field because when we set up GCP access we already created a `GOOGLE_APPLICATION_CREDENTIALS` env-var which Terraform can read in order to get our authentication keys.
 
@@ -1027,7 +1081,49 @@ You may access [`main.tf`](../1_basics_setup/terraform/main.tf) and [`variables.
 terraform init
 ```
 
-This will download the necessary plugins to connect to GCP and download them to `./.terraform`. Now let's plan the infrastructure:
+This will download the necessary plugins to connect to GCP and download them to `./.terraform`. 
+
+Now let's plan the infrastructure:
+
+### 在脚本建立一个bucket
+
+方式：cloud storage--bucket
+
+脚本：谷歌搜索 [terraform Google cloud storage](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket)
+
+```bash
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "5.13.0"
+    }
+  }
+}
+
+provider "google" {
+  credentials = "./keys/my-creds.json"  # Credentials only needs to be set if you do not have the GOOGLE_APPLICATION_CREDENTIALS set
+  project = "coherent-ascent-379901"
+  region  = "asia-southeastye1"
+}
+
+resource "google_storage_bucket" "demo-bucket" {
+  name          = "coherent-ascent-379901-terra-bucket"
+  location      = "asia-southeast1"
+  force_destroy = true
+
+  lifecycle_rule {
+    condition {
+      age = 2 //days
+    }
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+  }
+}
+```
+
+
 
 ### 计划，需要输入project id
 
