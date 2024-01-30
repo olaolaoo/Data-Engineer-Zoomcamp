@@ -9,3 +9,11 @@ ssh：` git clone git@github.com:olaolaoo/Data-Engineer-Zoomcamp.git `
 1. 进入仓库目录git add .
 2. git commit  -m "logs"
 3. git push origin main
+
+
+
+git add .gitignore 
+
+git commit -m "Add .gitignore file" 
+
+git push
