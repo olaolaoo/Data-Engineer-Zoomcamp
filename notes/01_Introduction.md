@@ -407,7 +407,7 @@ Clean up the script by removing everything we don't need. We will also rename it
     ```
 * We will also download the Parquet using the provided URL argument.
 
-You can check the completed `ingest_data.py` script [in this link](../01_basics_setup/2_docker_sql/ingest_data.py).
+You can check the completed `ingest_data.py` script [in this link](../1_basics_setup/2_docker_sql/ingest_data.py).
 
 In order to test the script we will have to drop the table we previously created. In pgAdmin, in the sidebar navigate to _Servers > Docker localhost > Databases > ny_taxi > Schemas > public > Tables > yellow_taxi_trips_, right click on _yellow_taxi_trips_ and select _Query tool_. Introduce the following command:
 
@@ -420,7 +420,7 @@ DROP TABLE yellow_taxi_data;
 We are now ready to test the script with the following command:
 
 ```bash
-python ingest_data_parquet.py \
+python ingest_data.py \
     --user=root \
     --password=root \
     --host=localhost \
@@ -429,7 +429,7 @@ python ingest_data_parquet.py \
     --table_name=yellow_taxi_data \
     --url="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2021-01.parquet"
 ```
-Back in pgAdmin, refresh the Tables and check that `yellow_taxi_trips` was created. You can also run a SQL query to check the contents:
+Back in pgAdmin, refresh the Tables and check that `yellow_taxi_data` was created. You can also run a SQL query to check the contents:
 
 ```sql
 SELECT
@@ -777,7 +777,7 @@ During this course we will use [Google Cloud Platform](https://cloud.google.com/
 
 ## 3.1.GCP  setup
 
-_([Video source](https://www.youtube.com/watch?v=Hajwnmj0xfQ&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=6))_
+_([Video source](https://www.youtube.com/watch?v=18jIzE41fJ4&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb))_
 
 GCP is organized around _projects_. You may create a project and access all available GCP resources and services from the project dashboard.
 
@@ -869,15 +869,13 @@ You should now be ready to work with GCP.
 
 ## 3.2.GCP setup for access
 
-_([Video source](https://www.youtube.com/watch?v=Hajwnmj0xfQ&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=6))_
-
 In the following chapters we will setup a _Data Lake_ on Google Cloud Storage and a _Data Warehouse_ in BigQuery. We will explore these concepts in future lessons but a Data Lake is where we would usually store data and a Data Warehouse provides a more structured way to access this data.
 
-![获得GCP账户](images/00_gcp.png)
+![获得GCP账户](./images/01_00.png)
 
  We need to setup access first by assigning the Storage Admin, Storage Object Admin, BigQuery Admin and Viewer IAM roles to the Service Account, and then enable the `iam` and `iamcredentials` APIs for our project.
 
-Please follow these steps:1在线上保存，换电脑也不影响，2换电脑需要重新安装，不确定？？？，3换电脑需要重新安装
+Please follow these steps:
 
 1. Assign the following IAM Roles to the Service Account: Storage Admin, Storage Object Admin, BigQuery Admin and Viewer.
    1. On the GCP Project dashboard, go to _IAM & Admin_ > _IAM_
@@ -893,21 +891,23 @@ Please follow these steps:1在线上保存，换电脑也不影响，2换电脑�
 1. Make sure that the `GOOGLE_APPLICATION_CREDENTIALS` environment variable is set.
 
 
-## 3.3. Terraform Basics
+## 3.3. Using basic Terraform to create a gcp bucket
 
-_([Video source](https://www.youtube.com/watch?v=dNkEgO-CExg&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=10))_
+_([Video source](https://www.youtube.com/watch?v=Y2ux7gq3Z0o&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=12))_
+
+> 看课程视频，很好理解！！*可以通过搜索[terraform google provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) 找到代码*
+>
+> Terraform ***configuration***用来描述infrastructure，在一个文件夹中有且仅有一个Terraform ***configuration***文件；文件格式Terraform 语言的`.tf`或者 JSON语言的`tf.json`
+
+> There must only be a single `terraform` block but there may be multiple `provider` and `resource` blocks
 
 There are 2 important components to Terraform: **the code files and Terraform commands**.
 
 **Terraform configuration（配置）**
 
-The set of files used to describe infrastructure in Terraform is known as a Terraform ***configuration***. Terraform configuration files end up in :
-
-​	`.tf` for files wtritten in Terraform language or `tf.json` for JSON files. 
+The set of files used to describe infrastructure in Terraform is known as a Terraform ***configuration***. Terraform configuration files end up in :`.tf` for files wtritten in Terraform language or `tf.json` for JSON files. 
 
 A Terraform configuration must be in its own working directory; you cannot have 2 or more separate configurations in the same folder.
-
->  Terraform ***configuration***用来描述infrastructure，在一个文件夹中有且仅有一个Terraform ***configuration***文件；文件格式Terraform 语言的`.tf`或者 JSON语言的`tf.json`
 
 Here's a basic `main.tf` file written in Terraform language with all of the necesary info to describe basic infrastructure:
 
@@ -922,14 +922,16 @@ terraform {
 }
 
 provider "google" {
-  credentials = "./keys/my-creds.json"  # Credentials only needs to be set if you do not have the GOOGLE_APPLICATION_CREDENTIALS set
-  project = "coherent-ascent-379901"
-  region  = "asia-southeastye1"
+  credentials = "./keys/my-creds.json" # Credentials only needs to be set if you do not have the GOOGLE_APPLICATION_CREDENTIALS set
+  project     = "coherent-ascent-379901"
+  region      = "us-central1"
 }
 
-resource "google_storage_bucket" "demo-bucket" {//“资源类型” “桶名称” 
-  name          = "coherent-ascent-379901-terra-bucket"//桶唯一标识unique
-  location      = "asia-southeast1"
+
+
+resource "google_storage_bucket" "demo-bucket" {
+  name          = "coherent-ascent-379901-terra-bucket"
+  location      = "US"
   force_destroy = true
 
   lifecycle_rule {
@@ -940,6 +942,11 @@ resource "google_storage_bucket" "demo-bucket" {//“资源类型” “桶名�
       type = "AbortIncompleteMultipartUpload"
     }
   }
+}
+
+resource "google_bigquery_dataset" "demo_dataset" {
+  dataset_id = "demo_dataset"
+
 }
 ```
 
@@ -966,18 +973,106 @@ resource "google_storage_bucket" "demo-bucket" {//“资源类型” “桶名�
     * In this example, the `google_compute_network` resource type has a single mandatory argument called `name`, which is the name that the resource will have within GCP's infrastructure.
       * Do not confuse the _resource name_ with the _`name`_ argument!
 
+**Terraform commands**.
+
+With a configuration ready, you are now ready to create your infrastructure. There are a number of commands that must be followed:
+
+* `terraform init` : initialize your work directory by downloading the necessary providers/plugins.
+* `terraform fmt` (optional): formats your configuration files so that the format is consistent.
+* `terraform validate` (optional): returns a success message if the configuration is valid and no errors are apparent.
+* `terraform plan` :  creates a preview of the changes to be applied against a remote state, allowing you to review the changes before applying them.
+* `terraform apply` : applies the changes to the infrastructure.
+* `terraform destroy` : removes your stack from the infrastructure.
+
+
+
+* **初始化链接GCP**
+
+```bash
+terraform init
+```
+
+This will download the necessary plugins to connect to GCP and download them to your directory  
+
+Now let's plan the infrastructure:
+
+* **计划，需要输入project id**
+
+```bash
+terraform plan
+```
+
+Terraform will ask for your **Project ID.** Type it and press enter to let Terraform access GCP and figure out what to do. The infrastructure plan will be printed on screen with all the planned changes marked with a `+` sign next to them.
+
+Let's apply the changes:
+
+* **应用更改**
+
+```bash
+terraform apply
+```
+
+You will need to confirm this step by typing `yes` when prompted. This will create all the necessary components in the infrastructure an return a `terraform.tfstate` with the current state of the infrastructure.
+
+After you've successfully created the infrastructure, you may destroy it so that it doesn't consume credit unnecessarily:
+
+* **销毁**
+
+```bash
+terraform destroy
+```
+
+Once again, you will have to confirm this step by typing `yes` when prompted. This will remove your complete stack from the cloud, so only use it when you're 100% sure of it.
+
+## 3.4.Using Variables Terraform to create a gcp bucket
+
+_([Video source](https://www.youtube.com/watch?v=PBi0hHjLftk&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=13))_
+
 **Variables**
 
-Besides these 3 blocks, there are additional available blocks:
+
 
 * ***Input variables*** block types are useful for customizing aspects of other blocks without altering the other blocks' source code. They are often referred to as simply _variables_. They are passed at runtime.
 
   ```java
-  variable "region" {
-      description = "Region for GCP resources. Choose as per your location: https://cloud.google.com/about/locations"
-      default = "europe-west6"
-      type = string
+  variable "credentials" {
+    description = "My Credentials"
+    default     = "/Users/ola/Downloads/coherent-ascent-379901-a51f81e9854e.json"
+    #ex: if you have a directory where this file is called keys with your service account json file
+    #saved there as my-creds.json you could use default = "./keys/my-creds.json"
   }
+  
+  
+  variable "project" {
+    description = "Project"
+    default     = "coherent-ascent-379901"
+  }
+  
+  variable "region" {
+    description = "Region for GCP resources. Choose as per your location: https://cloud.google.com/about/locations"
+    #Update the below to your desired region
+    default     = "us-central1"
+  }
+  
+  variable "location" {
+    description = "Project Location"
+    #Update the below to your desired location
+    default     = "US"
+  }
+  
+  variable "bq_dataset_name" {
+    description = "My BigQuery Dataset Name"
+    #Update the below to what you want your dataset to be called
+    default     = "demo_dataset"
+  }
+  
+  
+  
+  variable "gcs_storage_class" {
+    description = "Bucket Storage Class"
+    default     = "STANDARD"
+  }
+  
   ```
 
   * Description:
@@ -1000,9 +1095,8 @@ Besides these 3 blocks, there are additional available blocks:
 * ***Local values*** block types behave more like constants.
 
   ```java
-  locals{
-      region  = "us-central1"
-      zone    = "us-central1-c"
+  locals {
+    data_lake_bucket = "dtc_data_lake"
   }
   ```
 
@@ -1013,33 +1107,8 @@ Besides these 3 blocks, there are additional available blocks:
 
   * Local values must be accessed with the word `local` (_mind the lack of `s` at the end!_).
 
-    ```java
-    region = local.region
-    zone = local.zone
-    ```
 
-With a configuration ready, you are now ready to create your infrastructure. There are a number of commands that must be followed:
-
-* `terraform init` : initialize your work directory by downloading the necessary providers/plugins.
-* `terraform fmt` (optional): formats your configuration files so that the format is consistent.
-* `terraform validate` (optional): returns a success message if the configuration is valid and no errors are apparent.
-* `terraform plan` :  creates a preview of the changes to be applied against a remote state, allowing you to review the changes before applying them.
-* `terraform apply` : applies the changes to the infrastructure.
-* `terraform destroy` : removes your stack from the infrastructure.
-
-## 3.4.Creating GCP infrastructure with Terraform
-
-_([Video source](https://www.youtube.com/watch?v=Y2ux7gq3Z0o&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=12))_
-
-### main.tf 
-
-**看课程视频，很好理解！！*可以通过搜索[terraform google provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) 找到代码***
-
-
-
-We will now create a new `main.tf` file as well as an auxiliary `variables.tf` file with all the blocks we will need for our project.
-
-The infrastructure we will need consists of a Cloud Storage Bucket (`google_storage-bucket`) for our _Data Lake_ and a BigQuery Dataset (`google_bigquery_dataset`).
+We will now create a new `main.tf` file as well as an auxiliary `variables.tf` file with all the blocks we will need for our project
 
 In `main.tf` we will configure the `terraform` block as follows:
 
@@ -1054,63 +1123,19 @@ terraform {
 }
 
 provider "google" {
-  credentials = "./keys/my-creds.json"  # Credentials only needs to be set if you do not have the GOOGLE_APPLICATION_CREDENTIALS set
-  project = "coherent-ascent-379901"
-  region  = "asia-southeastye1"
-}
-```
-
-* The `required_version` field states the minimum Terraform version to be used.
-* The `backend` field states where we'd like to **store the _state_ of the infrastructure**. `local` means that we'll store it locally in our computers. Alternatively, you could store the state online.
-
-The provider will not make use of the `credentials` field because when we set up GCP access we already created a `GOOGLE_APPLICATION_CREDENTIALS` env-var which Terraform can read in order to get our authentication keys.
-
-### variables.tf
-
-In the `variables.tf` we will store variables that may change depending on your needs and location. The ones to note are:
-
-* `region` may vary depending on your geographical location; change it according to your needs.
-* `BQ_DATASET` has the name of the table for BigQuery. You may leave it as it is or change it t fit your needs.
-* `project` is the Project ID of your project in GCP. SInce the ID is unique, it is good practice to have Terraform as for it every time in case the same code is applied on different projects.
-
-You may access [`main.tf`](../1_basics_setup/terraform/main.tf) and [`variables.tf`](../1_basics_setup/terraform/variables.tf). Take a look at them to understand the details of the implementation. Copy them to a new folder within your work directory so that the subfolder only contains the Terraform configuration files. Now run the following commands:
-
-### 初始化链接GCP
-
-```bash
-terraform init
-```
-
-This will download the necessary plugins to connect to GCP and download them to `./.terraform`. 
-
-Now let's plan the infrastructure:
-
-### 在脚本建立一个bucket
-
-方式：cloud storage--bucket
-
-脚本：谷歌搜索 [terraform Google cloud storage](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket)
-
-```bash
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "5.13.0"
-    }
-  }
+  //credentials = "./keys/my-creds.json" # Credentials only needs to be set if you do not have the GOOGLE_APPLICATION_CREDENTIALS set
+  project = var.project
+  region  = var.region
 }
 
-provider "google" {
-  credentials = "./keys/my-creds.json"  # Credentials only needs to be set if you do not have the GOOGLE_APPLICATION_CREDENTIALS set
-  project = "coherent-ascent-379901"
-  region  = "asia-southeastye1"
-}
+
 
 resource "google_storage_bucket" "demo-bucket" {
-  name          = "coherent-ascent-379901-terra-bucket"
-  location      = "asia-southeast1"
+  name          = "${local.data_lake_bucket}_${var.project}"
+  location      = var.location
   force_destroy = true
+  # Optional, but recommended settings:
+  storage_class = var.gcs_storage_class
 
   lifecycle_rule {
     condition {
@@ -1121,37 +1146,15 @@ resource "google_storage_bucket" "demo-bucket" {
     }
   }
 }
+
+
+resource "google_bigquery_dataset" "demo_dataset" {
+  dataset_id = var.bq_dataset_name
+
+}
 ```
 
-
-
-### 计划，需要输入project id
-
-```bash
-terraform plan
-```
-
-Terraform will ask for your **Project ID.** Type it and press enter to let Terraform access GCP and figure out what to do. The infrastructure plan will be printed on screen with all the planned changes marked with a `+` sign next to them.
-
-Let's apply the changes:
-
-### 应用更改
-
-```bash
-terraform apply
-```
-
-You will need to confirm this step by typing `yes` when prompted. This will create all the necessary components in the infrastructure an return a `terraform.tfstate` with the current state of the infrastructure.
-
-After you've successfully created the infrastructure, you may destroy it so that it doesn't consume credit unnecessarily:
-
-### 销毁
-
-```bash
-terraform destroy
-```
-
-Once again, you will have to confirm this step by typing `yes` when prompted. This will remove your complete stack from the cloud, so only use it when you're 100% sure of it.
+then, do terraform command
 
 # 4、Extra content
 
@@ -1167,11 +1170,11 @@ If you're having issues with Docker and networking (especially if you already ha
 
 ## Docker Module Walk-Through on WSL
 
-[videocourse](https://www.youtube.com/watch?v=Mv4zFm2AwzQ&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=15)
+[videocourse](https://www.youtube.com/watch?v=Mv4zFm2AwzQ)
 
 ## Setting up GitHub Codespaces
 
-[videocourse](https://www.youtube.com/watch?v=Jl2_Hkxkbyc&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=16)
+[videocourse](https://www.youtube.com/watch?v=XOSUt8Ih3zA&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
 ## 不同电脑之间，python库包环境保持一致
 
