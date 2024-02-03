@@ -201,7 +201,7 @@ Set as picture below down, type `SELECT 1`to test. if no error occer, well done!
 
   > we will use this data url: https://github.com/DataTalksClub/nyc-tlc-data/releases/download/yellow/yellow_tripdata_2021-01.csv.gz
 
-  The whole script you can check out here [load_data.py](../2_workflow-orchestration/mage_progres/load_data.py)
+  The whole script you can check out here [load_data.py](../2_workflow-orchestration/mage_postgres/load_data.py)
 
 **Step3: Transform Data**
 
@@ -209,7 +209,7 @@ There are some issues with the data you just loaded. You might want to look into
 
 click `transformer` ---`python`---`Generic(no template)`
 
-The whole script you can check out here [transform_data.py](../2_workflow-orchestration/mage_progres/transform_data.py)
+The whole script you can check out here [transform_data.py](../2_workflow-orchestration/mage_postgres/transform_data.py)
 
 **Step4: Export Data**
 
@@ -217,7 +217,7 @@ we can use python or sql to export our data. Here, we choose to use python.
 
 click `Data exporter` ---`python`---`PostgreSQL`
 
-The whole script you can check out here [export_data.py](../2_workflow-orchestration/mage_progres/export_data.py)
+The whole script you can check out here [export_data.py](../2_workflow-orchestration/mage_postgres/export_data.py)
 
 Finally, you can create a new data loader to test your data.
 
