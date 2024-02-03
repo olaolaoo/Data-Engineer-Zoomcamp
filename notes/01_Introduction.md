@@ -1,4 +1,4 @@
-> Next:[02_data_ingestion](02_data_ingestion.md)
+> Next:[02_workflow-orchestration](02_workflow-orchestration.md)
 
 # 1、Introduction
 
@@ -56,6 +56,8 @@ Docker containers are **_stateless_**: any changes done inside a container will 
 > Dockerfile，python脚本，执行命令都在一个目录下
 
 **(1) how to use Docker**
+
+It requires Docker to be installed locally. If Docker is not installed, please follow the instructions [here](https://docs.docker.com/get-docker/).
 
 **setting up docker on your Mac**
 
