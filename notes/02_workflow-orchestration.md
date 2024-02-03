@@ -252,9 +252,12 @@ Mage uses service accounts to connect to gcp. Go to GCP, and search the`Service 
 **Step3:  Configure GCP in Mage**
 
 1. Move the key json file to your Mage project directory
+
 2. Go to `localhost:6789`
+
 3. Modify  `io_config.yaml` file
-4. ![](./images/02_11.png)
+
+   ![](./images/02_11.png)
 
 5. You can check  [docker-compose.yml](../2_workflow-orchestration/mage-zoomcamp/docker-compose.yml), find this code:`volumes: - .:/home/src/` in Mage image, that means copy eveything in this directory to `/home/src/` which is in the mage.so, you can use terminal in Mage `ls -la` find your key json file.
 
@@ -296,15 +299,28 @@ we'll walk through the process of using Mage to extract, transform, and load dat
 
 ![](./images/02_20.png)
 
-Modify and run.
+2. Modify and run.
 
 ![](./images/02_21.png)
 
-done.
+3. done.
 
 ![](./images/02_22.png)
 
-### Pipeline-3: load cloud data to GCS 
+### Pipeline-3: load partitioned parquet data to GCS 
+
+So partitioning means to break a data  by some row or characteristic and partitioning by date is often particularly useful.
+because it creates an even distribution for rides and it's a very natural way to part to query data.
+
+1. Create a new data exporter and leave other blocks based on [Pipeline-2: load cloud data to GCS](###Pipeline-2: load cloud data to GCS)
+
+![](./images/02_23.png)
+
+2. We use python library `pyarrow` to do the partitioning.The whole script you can check out here [export_data_partition.py](../2_workflow-orchestration/mage_gcs/export_data_partition.py)   And you run this block.
+
+3. Then Go back to look into the new data you have exported to GCS. You can see the data has been partitioned into los of parts by date.
+
+   ![](./images/02_24.png)
 
 ## 4.3.ETL: GCS to BigQuery
 

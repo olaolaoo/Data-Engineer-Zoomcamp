@@ -25,3 +25,10 @@ git rm --cached '**/.DS_Store'
 git commit -m "Remove .DS_Store  from tracking"
 
 git push
+
+# submodule
+
+git submodule add https://github.com/mage-ai/mage-zoomcamp.git mage-zoomcamp 2_workflow-orchestration/mage-zoomcamp
+
+git submodule init
+git submodule update
