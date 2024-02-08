@@ -871,10 +871,6 @@ You should now be ready to work with GCP.
 
 ## 3.2.GCP setup for access
 
-In the following chapters we will setup a _Data Lake_ on Google Cloud Storage and a _Data Warehouse_ in BigQuery. We will explore these concepts in future lessons but a Data Lake is where we would usually store data and a Data Warehouse provides a more structured way to access this data.
-
-![获得GCP账户](./images/01_00.png)
-
  We need to setup access first by assigning the Storage Admin, Storage Object Admin, BigQuery Admin and Viewer IAM roles to the Service Account, and then enable the `iam` and `iamcredentials` APIs for our project.
 
 Please follow these steps:

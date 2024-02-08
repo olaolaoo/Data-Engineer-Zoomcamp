@@ -1,5 +1,3 @@
-
-
 # 1.Intro to Orchestration
 
 *[videocourse](https://www.youtube.com/watch?v=Li8-MWHhTbo&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)*
@@ -8,13 +6,13 @@
 
 In this section, we'll cover the basics of workflow orchestration. We'll discuss what it is, why it's important, and how it can be used to build data pipelines.
 
-![02](images/02_01.png "tu")
+<img src="images/02_01.png" alt="02" title="tu" style="zoom:50%;" />
 
 **1.1.what is Orchestration?**
 
 * A large part of data engineering is **extracting, transforming, and loading** data between sources.
 
-![02_02](./images/02_02.png)
+<img src="./images/02_02.png" alt="02_02" style="zoom:50%;" />
 
 * **Orchestration** is a process of dependency management, facilitated through **automation**.orchestration is one of the undercurrents.when we say orchestration is an undercurrent that means it happens throughout the entire life cycle of data engineering.
 * The data orchestrator manages scheduling, triggering, monitoring, and even resource allocation. 
@@ -46,7 +44,7 @@ In this section, we'll introduce the Mage platform. We'll cover what makes Mage 
 
 *[Videocourse](https://www.youtube.com/watch?v=AicKRcK3pa4&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=18)*
 
-*Mage An open-source pipeline tool for orchestrating, transforming, and integrating data* . more details about it, check  [here](https://docs.docker.com/get-docker/).
+*Mage An open-source pipeline tool for orchestrating, transforming, and integrating data* . *more details about it, check  [here](https://docs.docker.com/get-docker/).*
 
 ## 2.2.Configure Mage
 
@@ -130,7 +128,7 @@ docker pull mageai/mageai:latest
 
 Navigate to http://localhost:6789 in your browser.There is a project called magic-zoomcamp, and there is a example pipeline alreday in it. You can check it out and know how it works.
 
-# 3.Local version: Mage and Postgres
+# 3.Load to Local : Mage and Postgres
 
 Hooray! Mage is up and running. Now, let's build a *real* pipeline. 
 
@@ -227,10 +225,9 @@ use:
 SELECT * FROM ny_taxi.yellow_cab_data LIMIT 10
 ```
 
-# 4.Cloud version:Mage and GCP
+# 4.Load to Cloud:Mage and GCP
 
-welcome back in this module we're going to do everything we need to do in Google Cloud for mage to read and write data to both Google Cloud Storage and Google Big
-Query.
+welcome back in this module we're going to do everything we need to do in Google Cloud for mage to read and write data to both Google Cloud Storage and Google BigQuery.
 
 ## 4.1.Configure GCP
 
@@ -283,11 +280,13 @@ we'll walk through the process of using Mage to extract, transform, and load dat
 
 ![](./images/02_15.png)
 
-2. You can get the `titanic_clean.csv`  in your local `mage-zoomcamp` folder.You wiil upload it to GCS bucket.
+2. You can get the `titanic_clean.csv`  in your local `mage-zoomcamp` folder.You wiil upload it to GCS bucket. 
+
+   Uploading local csv file to your bucket successfully means the connection with GCS is correct.
 
    ![](./images/02_16.png)
 
-3. You can either create a new pipeline or use your old pipeline to check the connection to Google Cloud Storage (GCS).
+3. After step2, You can either create a new pipeline or use your old pipeline to check the connection to Google Cloud Storage (GCS). Loading data in  Google Cloud Storage  successfully means the connection with GCS is correct.
 
 ![](./images/02_17.png)
 
@@ -328,17 +327,185 @@ because it creates an even distribution for rides and it's a very natural way to
 
 Now that we've written data to GCS, let's load it into BigQuery. In this section, we'll walk through the process of using Mage to load our data from GCS to BigQuery. This closely mirrors a very common data engineering workflow: loading data from a data lake into a data warehouse.
 
-1. Create a new pipeline named gcs_to bigquery in Standard bath and use python google cloud store to load data
+1. Create a new pipeline named `gcs_to bigquery`in Standard bath and use `python`-`google cloud store` to load data. and named it `load_taxi_gcs`
 
-   ![](./images/02_19.png)
+<img src="./images/02_19.png" style="zoom: 25%;" />
 
-2. 
+Modify and run. what you need to modify is `bucket_name` and `object_key`, and `deleting the test part`. The whole script you can check out here [load_data.py](../2_workflow-orchestration/mage_bigquery/load_data.py)
+
+2. Because there is something wrong with the column name, so we need to do some transformations to it.
+
+   click `transformer` ---`python`---`Generic(no template)` The whole script you can check out here [transform_data.py](../2_workflow-orchestration/mage_bigquery/transform_data.py)
+
+3. click `Data exporter` ---`SQL`, named `write_taxi_to_bigquery`, modify the settings like down below.
+
+<img src="./images/02_25.png" style="zoom: 25%;" />
+
+type and run this block :
+
+```sql
+SELECT * FROM {{ df_1 }}
+```
+
+in here, there might be a error about the permission of creating dataset, so you need to go back to GCP and change the `IM` of your service account, grant the ` BigQuery Admin` to it. 
+
+If you get this message, done!
+
+<img src="./images/02_26.png" style="zoom:25%;" />
+
+4. Go back to GCP,  search `bigquery` to look into the data you just loaded.
+
+   
+
+---
 
 
 
+**How to schedule your pipeline:**
+
+1. click `triggers` 
+
+<img src="./images/02_27.png" style="zoom:60%;" />
+
+<img src="./images/02_28.png" style="zoom: 60%;" />
+
+<img src="./images/02_29.png" style="zoom:25%;" />
+
+2. save changes
+
+# 5.Variables in Mage
+
+* By now you're familiar with building pipelines, but what about **adding parameters**?
+
+* In Mage there are a bunch of different types of variables. like There are runtime variables, Global variables you can you can look at all of these in mage documentation.In this video, we'll discuss some built-in **runtime variables** that exist in Mage and show you how to define your own! 
+
+* We'll also cover how to use these variables to parameterize your pipelines. 
+
+* Finally, we'll talk about what it means to *backfill* a pipeline and how to do it in Mage.
+
+- [Mage Variables Overview](https://docs.mage.ai/development/variables/overview)
+- [Mage Runtime Variables](https://docs.mage.ai/getting-started/runtime-variable)
+-  [Backfilling pipelines](https://docs.mage.ai/orchestration/backfills/overview)
+
+### 5.1.Parameterized Execution depending on variables
+
+参数化执行
+
+[*Videocourse*](https://www.youtube.com/watch?v=H0hWjWxB-rg&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=27)
+
+**write data to a specific parquet file by date in order to get a incremental data增量数据**, it seems like [pipeline-3](###Pipeline-3: load partitioned parquet data to GCS ), but there is a bit different from it.
+
+1. clone the pipeline and rename it to `api_to_gcs_parameter`
+
+![](./images/02_30.png)
+
+2. modify
+
+   * `Delete partitioned block`
+
+   ![](./images/02_31.png)
+
+   * add a `data exporter `named `taxi_to_gcs_parameter` by `python`-`google cloud storage` , and copy the content of `taxi_to_gcs_parquet`, and don't change anything in the `taxi_to_gcs_parquet` and delete it in this pipeline.
+
+     > The blocks in the pipeline can be reused. If a copied block is modified, it will change all pipelines containing this block. Be cautious!
+
+   * Knowing what is `kwargs` : modify `taxi_to_gcs_parameter` by just leave `print(kwargs)` init
+
+   ```python
+   @data_exporter
+   def export_data_to_google_cloud_storage(df: DataFrame, **kwargs) -> None:
+       """
+       Template for exporting data to a Google Cloud Storage bucket.
+       Specify your configuration settings in 'io_config.yaml'.
+   
+       Docs: https://docs.mage.ai/design/data-loading#googlecloudstorage
+       """
+       
+       
+       print(kwargs)
+   ```
+
+   ​	the output is 
+
+   ```python
+   {'env': 'dev', 'execution_date': datetime.datetime(2024, 2, 8, 4, 11, 14, 601203), 'interval_end_datetime': datetime.datetime(2024, 2, 9, 4, 11, 14, 601203), 'interval_seconds': None, 'interval_start_datetime': datetime.datetime(2024, 2, 8, 4, 11, 14, 601203), 'interval_start_datetime_previous': None, 'event': {}, 'logger': <Logger taxi_to_gcs_parameter_test (INFO)>, 'configuration': {}, 'context': {}, 'pipeline_uuid': 'api_to_gcs_parameter', 'block_uuid': 'taxi_to_gcs_parameter'}
+   ```
+
+   * After knowing `kwarg`, modify the whole script to [export_data.py](../2_workflow-orchestration/mage_gcs/export_data_parameter.py) and run.
+
+     ![](./images/02_32.png)
+
+![](./images/02_33.png)
+
+![](./images/02_34.png)
+
+### 5.2.Backfills
+
+Using backfill to replicate lost data.More details in [Backfilling pipelines](https://docs.mage.ai/orchestration/backfills/overview)
+
+![](./images/02_35.png)
 
 
 
+# Summary
 
+Through [3.Load to Local : Mage and Postgres](#3.Load to Local : Mage and Postgres) and [4.Load to Cloud:Mage and GCP](#4.Load to Cloud:Mage and GCP), although you can export data to GCP, but the whole **mage project and container is in local machine** including all the pipeline you created. And [6.Deployment (Optional)](#6.Deployment (Optional)) in this chapter, you can learn a cloud version of creating a pipeline project in the cloud, and deploy container images to a new Cloud Run service or to a new revision of an existing Cloud Run service.
 
+# 6. Deploying mage-ai to GCP (Optional)
+
+In this section, we'll cover deploying Mage using Terraform and Google Cloud. This section is optional— it's not *necessary* to learn Mage, but it might be helpful if you're interested in creating a fully deployed project. If you're using Mage in your final project, you'll need to deploy it to the cloud.
+
+## 6.1.Prerequisites
+
+If some steps you haved prepared in last lesson, you can skip them.
+
+* step1: [Installing Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+* step2: [Installing `gcloud` CLI](https://cloud.google.com/sdk/docs/install):atfer installing, using `gcloud auth list `  to list your active account or `gcloud storage ls` to list your buckets to check if you install gcloud cli successfully.
+* step3: [Set Google Cloud permission](01_Introduction.md/##3.1.GCP  setup): Go to `IM`, set your service account:
+  * Artifact Registry Reader
+  * Artifact Registry Writer
+  * Cloud Run Developer
+  * Cloud SQL Admin
+  * Service Account Token Creator
+  * Owner
+* Step4:[Installing Terraform](https://docs.mage.ai/production/deploying-to-cloud/using-terraform)
+
+## 6.2.Deploying to GCP with Terraform
+
+[*Videocourse1*](https://www.youtube.com/watch?v=9A872B5hb_0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=30)
+
+[*Videocourse2*](https://www.youtube.com/watch?v=9A872B5hb_0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=31)
+
+If some steps you haved prepared in last lesson, you can skip them.
+
+- [Deploying to GCP with Terraform](https://docs.mage.ai/production/deploying-to-cloud/gcp/setup)
+
+  - clone [Mage Terraform Templates](https://github.com/mage-ai/mage-ai-terraform-templates)
+
+  - modify .tf file in gcp directory 
+
+  - terraform init; terraform plan; terraform apply
+
+    * GCP - 2.2.7d Load Balancer Problem (Security Policies quota)
+
+      ```bash
+      ╷
+      │ Error: Error waiting for Creating SecurityPolicy "mage-data-prep-security-policy": Quota 'SECURITY_POLICY_RULES' exceeded.  Limit: 0.0 globally.
+      │       metric name = compute.googleapis.com/security_policy_rules
+      │       limit name = SECURITY-POLICY-RULES-per-project
+      │       dimensions = map[global:global]
+      │ 
+      │ 
+      │   with google_compute_security_policy.policy,
+      │   on load_balancer.tf line 7, in resource "google_compute_security_policy" "policy":
+      │    7: resource "google_compute_security_policy" "policy" {
+      ```
+
+  * go to GCP , search `cloud run` and you can see a new service. 
+
+    ![](./images/02_36.png)
+
+  * Open it and set the networking and copy the `URL`, you can open a mage project
+
+    ![](./images/02_37.png)
 
