@@ -2,7 +2,7 @@
 >
 > [See the content tree](index.md)
 >
-> Next:[02_workflow-orchestration](02_workflow-orchestration.md)
+> Next:[03_data-warehouse](03_data-warehouse.md)
 
 # 1.Intro to Orchestration
 
@@ -490,10 +490,12 @@ If some steps you haved prepared in last lesson, you can skip them.
 
   - modify .tf file in gcp directory 
 
-  - terraform init; terraform plan; terraform apply
+  - `terraform init; terraform plan; terraform apply;terraform destroy`
 
-    * GCP - 2.2.7d Load Balancer Problem (Security Policies quota)
+    - Error1: after type `terraform apply`
 
+      - GCP - 2.2.7d Load Balancer Problem (Security Policies quota)
+    
       ```bash
       ╷
       │ Error: Error waiting for Creating SecurityPolicy "mage-data-prep-security-policy": Quota 'SECURITY_POLICY_RULES' exceeded.  Limit: 0.0 globally.
@@ -506,12 +508,38 @@ If some steps you haved prepared in last lesson, you can skip them.
       │   on load_balancer.tf line 7, in resource "google_compute_security_policy" "policy":
       │    7: resource "google_compute_security_policy" "policy" {
       ```
-
+    
+      * Solution: 
+    
+        If you are on the free trial account on GCP you will face this issue when trying to deploy the infrastructures with terraform. This service is not available for this kind of account.
+    
+        The solution I found was to delete the *load_balancer.tf* file and to comment or delete the rows that differentiate it on the *main.tf* file. After this just do **terraform destroy** to delete any infrastructure created on the fail attempts and re-run the **terraform apply**.
+    
+        Code on *main.tf* to comment/delete:
+    
+        Line 166, 167, 168
+    
+    - Error2: after type `terraform destroy`
+    
+      - ```bash
+         Error: Error when reading or editing Database: googleapi: Error 400: Invalid request: failed to delete database "mage-data-prep-db". Detail: pq: database "mage-data-prep-db" is being accessed by other users. (Please use psql client to delete database that is not owned by "cloudsqlsuperuser")., invalid
+        │ 
+        │ 
+        ╵
+        ╷
+        │ Error: Error, failed to deleteuser postgres in instance mage-data-prep-db-instance: googleapi: Error 400: Invalid request: failed to delete user postgres: . role "postgres" cannot be dropped because some objects depend on it Details: 43 objects in database mage-data-prep-db., invalid
+        ```
+    
+      - Solution:
+    
+        - Try `terraform destroy` again, it seems a networking problem.
+    
+  
   * go to GCP , search `cloud run` and you can see a new service. 
-
+  
     ![](./images/02_36.png)
-
+  
   * Open it and set the networking and copy the `URL`, you can open a mage project
-
+  
     ![](./images/02_37.png)
 
