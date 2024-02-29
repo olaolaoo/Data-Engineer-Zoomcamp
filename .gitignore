@@ -1,22 +1,35 @@
+#MacOS 系统自动生成的隐藏文件
 **/.DS_Store
+
 **/.history/
 **/.ipynb_checkpoints/
 **/.parquet
 **/.csv
 **/.csv.gz
 
+#IntelliJ IDEA IDE 自动生成的项目配置文件目录
+**/.idea
 
-.idea
-*.tfstate
-*.tfstate.*
-**.terraform
-**.terraform.lock.*
-**google_credentials.json
-**logs/
-**.env
+#Terraform 的状态文件，可能包含敏感信息
+**/.tfstate
+
+#Terraform 的备份和临时状态文件
+**/.tfstate.*
+
+#Terraform 的工作目录
+**/.terraform
+**/.terraform.lock.*
+
+#Google Cloud 平台的凭证文件
+**/google_credentials.json
+**/logs/
+**/.env
+
+#Python 的缓存目录
 **__pycache__/
-**/ny_taxi_postgres_data/*
-serving_dir
-!week_6_stream_processing/avro_example/data/rides.csv
-**/5_batch_processing/data/*
-**/5_batch_processing/fhvhv/*
+**/ny_taxi_postgres_data/**
+**/serving_dir
+
+**/5_batch_processing/data/**
+**/5_batch_processing/fhvhv/**
+!
