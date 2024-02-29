@@ -4,7 +4,6 @@
 **/.history/
 **/.ipynb_checkpoints/
 **/.parquet
-**/.csv
 **/.csv.gz
 
 #IntelliJ IDEA IDE 自动生成的项目配置文件目录
@@ -32,4 +31,6 @@
 
 **/5_batch_processing/data/**
 **/5_batch_processing/fhvhv/**
-!
+**/5_batch_processing/zones/**
+**/5_batch_processing/tmp/**
+
