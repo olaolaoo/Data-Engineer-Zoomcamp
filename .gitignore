@@ -18,3 +18,5 @@
 **/ny_taxi_postgres_data/*
 serving_dir
 !week_6_stream_processing/avro_example/data/rides.csv
+**/5_batch_processing/data/*
+**/5_batch_processing/fhvhv/*
