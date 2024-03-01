@@ -21,11 +21,7 @@ Here’s what you need to learn to build pipelines
 - Ultimately, a data engineer's role extends beyond the mechanical aspects of pipeline development, encompassing the strategic management and enhancement of the entire data lifecycle.
 - This workshop focuses on building robust, scalable, self maintaining pipelines, with built in governance - in other words, best practices applied.
 
-## 1.3.How to ingest
-
-### Installing dlt
-
-What is dlt?
+## 1.3.What is dlt?
 
 - dlt is an open-source library that you can add to your Python scripts to load data from various and often messy data sources into well-structured, live datasets.【dlt是一个开源的库，你可以使用它把不同的数据源加载成结构良好的数据集】
 - You can install it using pip and there's no need to start any backends or containers. You can simply import dlt in your Python script and write a simple pipeline to load data from sources like APIs, databases, files, etc. into a destination of your choice.
@@ -48,7 +44,9 @@ Benefits: As a data engineer, dlt offers several benefits:
 pip install dlt[duckdb] # Install dlt with all the necessary DuckDB dependencies
 ```
 
-### 1.3.1.Extracting data
+## 1.4.How to ingest
+
+### 1.4.1.Extracting data
 
 In this section we will learn about extracting data from source systems, and what to care about when doing so.
 
@@ -168,7 +166,7 @@ In this example, we are using `dlt` library to do the loading, which will proces
 
 [load_to_DuckDB.py](../7_workshop/data_injestion/load_to_DuckDB.py)
 
-### 1.3.2.Normalising data
+### 1.4.2.Normalising data
 
 【规范化数据】
 
@@ -317,13 +315,13 @@ We want to load this data to a database. How do we want to clean the data?
 
   Or explore the data in the linked [colab notebook](https://colab.research.google.com/drive/1kLyD3AL-tYf_HqCXYnA3ZLwHGpzbLmoj#scrollTo=N9PrR_edOvSw&forceEdit=true&sandboxMode=true).
 
-### 1.3.3.Incremental loading data
+### 1.4.3.Incremental loading data
 
 在规范化的基础上，更改payment_status，采用merge的方式增量数据
 
 the whole script which you can check[incremental_load_to_DuckDB.py](../7_workshop/data_injestion/incremental_load_to_DuckDB.py)
 
-## 1.4.What’s next?
+## 1.5.What’s next?
 
 - You could change the destination to parquet + local file system or storage bucket. See the[colab notebook](https://colab.research.google.com/drive/1kLyD3AL-tYf_HqCXYnA3ZLwHGpzbLmoj#scrollTo=N9PrR_edOvSw&forceEdit=true&sandboxMode=true) bonus section.
 - You could change the destination to BigQuery. Destination & credential setup docs: https://dlthub.com/docs/dlt-ecosystem/destinations/, https://dlthub.com/docs/walkthroughs/add_credentials or See the [colab notebook](https://colab.research.google.com/drive/1kLyD3AL-tYf_HqCXYnA3ZLwHGpzbLmoj#scrollTo=N9PrR_edOvSw&forceEdit=true&sandboxMode=true) bonus section.

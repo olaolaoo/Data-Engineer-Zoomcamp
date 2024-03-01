@@ -6,7 +6,7 @@
 
 # 1.Intro to Orchestration
 
-*[videocourse](https://www.youtube.com/watch?v=Li8-MWHhTbo&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)*
+*[video sourse](https://www.youtube.com/watch?v=Li8-MWHhTbo&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)*
 
 > 编排（Orchestration）是通过**自动化**实现的一种依赖管理过程
 
@@ -48,13 +48,13 @@ In this section, we'll introduce the Mage platform. We'll cover what makes Mage 
 
 ## 2.1.what's Mage
 
-*[Videocourse](https://www.youtube.com/watch?v=AicKRcK3pa4&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=18)*
+*[video sourse](https://www.youtube.com/watch?v=AicKRcK3pa4&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=18)*
 
 *Mage An open-source pipeline tool for orchestrating, transforming, and integrating data* . *more details about it, check  [here](https://docs.docker.com/get-docker/).*
 
 ## 2.2.Configure Mage
 
-*[Videocourse](https://www.youtube.com/watch?v=2SV-av3L3-k&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=19)*
+*[video sourse](https://www.youtube.com/watch?v=2SV-av3L3-k&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=19)*
 
 we need to use Mage to make a pipeline, so we need to configure Mage. Here, we use Docker to make it.All the command line works in your computer's Terminal.
 
@@ -130,7 +130,7 @@ docker pull mageai/mageai:latest
 
 ## 2.3.A example Pipeline
 
-*[Videocourse](https://www.youtube.com/watch?v=stI-gg4QBnI&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=20)*
+*[video sourse](https://www.youtube.com/watch?v=stI-gg4QBnI&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=20)*
 
 Navigate to http://localhost:6789 in your browser.There is a project called magic-zoomcamp, and there is a example pipeline alreday in it. You can check it out and know how it works.
 
@@ -144,7 +144,7 @@ Our database will be built using Docker— it will be running locally, but it's 
 
 ## 3.1.Configure Postgres
 
-*[Videocourse](https://www.youtube.com/watch?v=pmhI-ezd3BE&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=21)*
+*[video sourse](https://www.youtube.com/watch?v=pmhI-ezd3BE&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=21)*
 
 > 配置环境变量到mage---打开2.2配置的容器---测试连接
 
@@ -193,7 +193,7 @@ Set as picture below down, type `SELECT 1`to test. if no error occer, well done!
 
 ## 3.2.ETL: Ingest data to Postgres
 
-*[Videocourse](https://www.youtube.com/watch?v=Maidfe7oKLs&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=22)*
+*[video sourse](https://www.youtube.com/watch?v=Maidfe7oKLs&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=22)*
 
 **Step1: create a new pipeline named api_to_postgres in Mage**
 
@@ -237,7 +237,7 @@ welcome back in this module we're going to do everything we need to do in Google
 
 ## 4.1.Configure GCP
 
-[*Videocourse*](https://www.youtube.com/watch?v=00LP360iYvE&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
+[*video sourse*](https://www.youtube.com/watch?v=00LP360iYvE&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
 **Step1: create a new bucket named `mage-zoomcamp`**
 
@@ -276,7 +276,7 @@ Mage uses service accounts to connect to gcp. Go to GCP, and search the`Service 
 
 ## 4.2.ETL: Ingest data to GCS
 
-[*Videocourse*](https://www.youtube.com/watch?v=w0XmcASRUnc&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
+[*video sourse*](https://www.youtube.com/watch?v=w0XmcASRUnc&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
 we'll walk through the process of using Mage to extract, transform, and load data from an API to Google Cloud Storage (GCS).
 
@@ -329,7 +329,7 @@ because it creates an even distribution for rides and it's a very natural way to
 
 ## 4.3.ETL: GCS to BigQuery
 
-[*Videocourse*](https://www.youtube.com/watch?v=JKp_uzM-XsM&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=25&pp=iAQB)
+[*video sourse*](https://www.youtube.com/watch?v=JKp_uzM-XsM&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=25&pp=iAQB)
 
 Now that we've written data to GCS, let's load it into BigQuery. In this section, we'll walk through the process of using Mage to load our data from GCS to BigQuery. This closely mirrors a very common data engineering workflow: loading data from a data lake into a data warehouse.
 
@@ -397,7 +397,7 @@ If you get this message, done!
 
 参数化执行
 
-[*Videocourse*](https://www.youtube.com/watch?v=H0hWjWxB-rg&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=27)
+[*video sourse*](https://www.youtube.com/watch?v=H0hWjWxB-rg&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=27)
 
 **write data to a specific parquet file by date in order to get a incremental data增量数据**, it seems like [pipeline-3](###Pipeline-3: load partitioned parquet data to GCS ), but there is a bit different from it.
 
@@ -478,9 +478,9 @@ If some steps you haved prepared in last lesson, you can skip them.
 
 ## 6.2.Deploying to GCP with Terraform
 
-[*Videocourse1*](https://www.youtube.com/watch?v=9A872B5hb_0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=30)
+[*video sourse1*](https://www.youtube.com/watch?v=9A872B5hb_0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=30)
 
-[*Videocourse2*](https://www.youtube.com/watch?v=9A872B5hb_0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=31)
+[*video sourse2*](https://www.youtube.com/watch?v=9A872B5hb_0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=31)
 
 If some steps you haved prepared in last lesson, you can skip them.
 

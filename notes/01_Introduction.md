@@ -244,9 +244,9 @@ We will now create a Jupyter Notebook `upload-data.ipynb` file which we will use
 
 > Note: knowledge of Jupyter Notebook, Python environment management and Pandas is asumed in these notes. Please check [this link](https://gist.github.com/ziritrion/9b80e47956adc0f20ecce209d494cd0a#pandas) for a Pandas cheatsheet and [this link](https://gist.github.com/ziritrion/8024025672ea92b8bdeb320d6015aa0d) for a Conda cheatsheet for Python environment management.
 
-* .parquet:  `upload-data.ipynb` [in this link](../01_basics_setup/2_docker_sql/upload-data.ipynb)for a detailed guide. 
+* .parquet:  `upload-data.ipynb` [in this link](../1_basics_setup/2_docker_sql/upload-data.ipynb)for a detailed guide. 
 
-* .csv:`upload-data-csv.ipynb` [in this link](../01_basics_setup/2_docker_sql/other_file/upload-data-csv.ipynb)for a detailed guide. 
+* .csv:`upload-data-csv.ipynb` [in this link](../1_basics_setup/2_docker_sql/other_file/upload-data-csv.ipynb)for a detailed guide. 
 
 what you can get after doing things up there:
 
@@ -489,8 +489,6 @@ docker run -it \
 ## 2.8、SQL refresher
 
 Below are a series of SQL query examples to remember how SQL works. For this example we'll asume that we're working with 2 tables named `trips` (list of all yelow taxi trips of NYC for January 2021) and `zones` (list of zone IDs for pick ups and drop offs).
-
->Check the [homework](https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/week_1_basics_n_setup/homework.md) for the session to learn about the `zones` table.
 
 >For a more detailed look into SQL, check out [this article](https://towardsdatascience.com/sql-in-a-nutshell-part-1-basic-real-world-scenarios-33a25ba8d220).
 
@@ -1170,11 +1168,11 @@ If you're having issues with Docker and networking (especially if you already ha
 
 ## Docker Module Walk-Through on WSL
 
-[videocourse](https://www.youtube.com/watch?v=Mv4zFm2AwzQ)
+[video sourse](https://www.youtube.com/watch?v=Mv4zFm2AwzQ)
 
 ## Setting up GitHub Codespaces
 
-[videocourse](https://www.youtube.com/watch?v=XOSUt8Ih3zA&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
+[video sourse](https://www.youtube.com/watch?v=XOSUt8Ih3zA&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
 ## 不同电脑之间，python库包环境保持一致
 
