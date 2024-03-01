@@ -34,4 +34,6 @@
 **/5_batch_processing/zones/**
 **/5_batch_processing/tmp/**
 
-!2_workflow-orchestration/mage-zoomcamp/**
+**/.crc
+
+
