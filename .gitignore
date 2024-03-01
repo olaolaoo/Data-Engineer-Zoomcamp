@@ -32,6 +32,7 @@
 **/5_batch_processing/fhvhv/**
 **/5_batch_processing/zones/**
 **/5_batch_processing/tmp/**
+**/5_batch_processing/*.csv
 
 **/*.crc
 
