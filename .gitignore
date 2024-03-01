@@ -3,24 +3,23 @@
 
 **/.history/
 **/.ipynb_checkpoints/
-**/.parquet
-**/.csv.gz
+**/*.parquet
+**/*.csv.gz
 
 #IntelliJ IDEA IDE 自动生成的项目配置文件目录
 **/.idea
 
 #Terraform 的状态文件，可能包含敏感信息
-**/.tfstate
+**/*.tfstate
 
 #Terraform 的备份和临时状态文件
-**/.tfstate.*
+**/*.tfstate.*
 
 #Terraform 的工作目录
 **/.terraform
 **/.terraform.lock.*
 
-#Google Cloud 平台的凭证文件
-**/google_credentials.json
+
 **/logs/
 **/.env
 
@@ -34,6 +33,6 @@
 **/5_batch_processing/zones/**
 **/5_batch_processing/tmp/**
 
-**/.crc
+**/*.crc
 
 
