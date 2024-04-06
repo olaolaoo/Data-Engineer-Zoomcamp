@@ -1,4 +1,4 @@
-# 1.Workshop1-Data ingestion with dlt(data load tool)
+# Workshop1-Data ingestion with dlt(data load tool)
 
 You can get more details about [workshop of Data ingestion with dlt](https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/cohorts/2024/workshops/dlt.md)
 
@@ -146,7 +146,7 @@ In this example, we grab exactly the same data as we did in the API example abov
 
 Ok, downloading files is simple, but what if we want to do a stream download?
 
-That’s possible too - in effect giving us the best of both worlds. In this case we prepared a jsonl file which is already split into lines making our code simple. But json (not jsonl) files could also be downloaded in this fashion, for example using the `ijson` library.
+That’s possible too - in effect giving us the best of both worlds. In this case we prepared a jsonl file which is already split into lines making our code simple. But json (not jsonl) files could also be downloaded in this fashion, for example using the `json` library.
 
 What are the pros and cons of this method of grabbing data?
 
